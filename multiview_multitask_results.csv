@@ -1,0 +1,3 @@
+Method,AUC,Params
+TwoLoss,0.79 ± 0.01,"{'hidden': 64, 'lr': 0.001, 'epochs': 100, 'lambda_aux': 0.3}"
+Simul,0.80 ± 0.01,"{'hidden': 32, 'lr': 0.001, 'epochs': 100, 'lambda_aux': 0.5}"
