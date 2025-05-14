@@ -1,4 +1,3 @@
 Method,AUC,Params
-TwoLoss,0.79 ± 0.01,"{'hidden': 64, 'lr': 0.001, 'epochs': 100, 'lambda_aux': 0.3}"
-Simul,0.78 ± 0.01,"{'hidden': 32, 'lr': 0.001, 'epochs': 100, 'lambda_aux': 0.5}"
-MT-MLP,0.79 ± 0.02,"{'hidden': 32, 'num_layers_x': 3, 'num_layers_z': 2, 'lr': 0.001, 'lambda_view': 0.3, 'epochs': 100}"
+TwoLoss,0.80 ± 0.01,"{'hidden': 128, 'num_layers_x': 1, 'num_layers_z': 2, 'lr': 0.001, 'epochs': 100, 'lambda_aux': 0.3}"
+MT-MLP,0.79 ± 0.01,"{'hidden': 128, 'num_layers_x': 1, 'num_layers_z': 3, 'lr': 0.001, 'lambda_view': 0.5, 'epochs': 300}"

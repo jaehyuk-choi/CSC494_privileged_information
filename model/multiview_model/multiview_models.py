@@ -9,134 +9,266 @@ from sklearn.metrics import precision_recall_fscore_support, roc_auc_score
 ################################################################################
 # 1) Two‐Loss Multi‐View Model
 ################################################################################
+# class MultiViewNN_TwoLoss(nn.Module):
+#     """
+#     Two‐branch multi‐view model:
+#       1) Pretrain auxiliary branch (β+ψ) on Z → y.
+#       2) Freeze β, copy ψ as teacher.
+#       3) Train main branch (φ+ψ) on X with auxiliary regularization:
+#            L = BCE(ψ(φ(x)), y) + λ * BCE(ψ(β(z)), y)
+#     """
+#     def __init__(self, dim_x, dim_z, hidden=32, lr=1e-3, epochs=100, lambda_aux=0.5):
+#         super().__init__()
+#         self.epochs = epochs
+#         self.lambda_aux = lambda_aux
+
+#         # φ(x): main branch
+#         self.phi = nn.Sequential(
+#             nn.Linear(dim_x, hidden), nn.ReLU(),
+#             nn.Linear(hidden, hidden), nn.ReLU()
+#         )
+#         # β(z): auxiliary branch
+#         self.beta = nn.Sequential(
+#             nn.Linear(dim_z, hidden), nn.ReLU()
+#         )
+#         # ψ: shared classifier
+#         self.classifier = nn.Sequential(
+#             nn.Linear(hidden, 1), nn.Sigmoid()
+#         )
+
+#         # optimizers
+#         self.aux_opt  = optim.Adam(
+#             list(self.beta.parameters()) + list(self.classifier.parameters()),
+#             lr=lr
+#         )
+#         self.main_opt = None  # set after aux pretraining
+
+#         # losses
+#         self.bce = nn.BCELoss()
+#         # teacher copy
+#         self.fixed_classifier = None
+
+#     def forward(self, x, z):
+#         """
+#         Returns two predictions:
+#          - y_hat = ψ(φ(x))
+#          - y_z   = ψ(β(z))
+#         both as 1‐D tensors of shape (batch,)
+#         """
+#         s   = self.phi(x)
+#         sz  = self.beta(z)
+#         return self.classifier(s).view(-1), self.classifier(sz).view(-1)
+
+#     def pretrain_aux(self, Z, y):
+#         """Pretrain auxiliary branch on (Z, y)."""
+#         x_dummy = torch.zeros(Z.shape[0], self.phi[0].in_features, device=Z.device)
+
+#         for epoch in range(self.epochs):
+#             self.aux_opt.zero_grad()
+#             # 2) after forward, print representation shapes
+#             y_hat_x, y_hat_z = self.forward(x_dummy, Z)
+            
+#             loss   = self.bce(y_hat_z, y)
+#             loss.backward()
+#             self.aux_opt.step()
+#         # freeze β
+#         for p in self.beta.parameters():
+#             p.requires_grad = False
+#         # copy ψ as teacher
+#         self.fixed_classifier = copy.deepcopy(self.classifier)
+#         # create main optimizer for φ+ψ
+#         self.main_opt = optim.Adam(
+#             list(self.phi.parameters()) + list(self.classifier.parameters()),
+#             lr=self.aux_opt.defaults['lr']
+#         )
+
+#     def train_model(self, X, Z, y, x_val = None, y_val = None, z_val=None, record_loss=False, early_stopping_patience=10):
+#         """Train φ+ψ on (X, y) with auxiliary regularization from Z."""
+#         train_loss_history, val_loss_history = [], []
+#         best_val_loss = float('inf')
+#         patience_counter = 0
+
+#         for _ in range(self.epochs):
+#             self.train()
+#             self.main_opt.zero_grad()
+#             y_hat, _ = self.forward(X, Z)
+#             with torch.no_grad():
+#                 t = self.fixed_classifier(self.beta(Z)).view(-1)
+#             loss = self.bce(y_hat, y) + self.lambda_aux * self.bce(y_hat, t)
+#             loss.backward()
+#             self.main_opt.step()
+#             if record_loss:
+#                 train_loss_history.append(loss.item())
+
+#             if x_val is not None and y_val is not None:
+#                 self.eval()
+#                 with torch.no_grad():
+#                     y_val_hat, _ = self.forward(x_val, z_val)
+#                     val_loss = self.bce(y_val_hat, y_val)
+#                     if record_loss:
+#                         val_loss_history.append(val_loss.item())
+#                     if val_loss.item() < best_val_loss:
+#                         best_val_loss = val_loss.item()
+#                         patience_counter = 0
+#                     else:
+#                         patience_counter += 1
+#                         if patience_counter >= early_stopping_patience:
+#                             break
+
+#         if record_loss:
+#             return train_loss_history, val_loss_history
+
+#     def evaluate(self, X, y, Z):
+#         """
+#         Returns metrics dict including:
+#           - ‘auc’
+#           - precision/recall/f1 for each class
+#         """
+#         self.eval()
+#         with torch.no_grad():
+#             y_hat, _ = self.forward(X, Z)
+#         preds = (y_hat >= 0.5).float().cpu().numpy()
+#         y_np  = y.cpu().numpy()
+#         p, r, f, _ = precision_recall_fscore_support(y_np, preds, zero_division=0)
+#         try:
+#             auc = roc_auc_score(y_np, y_hat.cpu().numpy())
+#         except:
+#             auc = 0.0
+#         return {"auc":auc,
+#                 "p0":p[0],"r0":r[0],"f0":f[0],
+#                 "p1":p[1],"r1":r[1],"f1":f[1]}
+
 class MultiViewNN_TwoLoss(nn.Module):
     """
-    Two‐branch multi‐view model:
-      1) Pretrain auxiliary branch (β+ψ) on Z → y.
-      2) Freeze β, copy ψ as teacher.
-      3) Train main branch (φ+ψ) on X with auxiliary regularization:
-           L = BCE(ψ(φ(x)), y) + λ * BCE(ψ(β(z)), y)
+    Two-branch multi-view model with independent depths:
+      - φ: main branch on X with num_layers_x layers.
+      - β: auxiliary branch on Z with num_layers_z layers.
+      Training steps:
+        1) Pretrain β+ψ on Z → y.
+        2) Freeze β, copy ψ as teacher.
+        3) Train φ+ψ on X with auxiliary regularization:
+             L = BCE(ψ(φ(x)), y) + λ * BCE(ψ(β(z)), y)
     """
-    def __init__(self, dim_x, dim_z, hidden=32, lr=1e-3, epochs=100, lambda_aux=0.5):
+    def __init__(self, dim_x, dim_z, hidden=32,
+                 num_layers_x=2, num_layers_z=1,
+                 lr=1e-3, epochs=100, lambda_aux=0.5):
         super().__init__()
-        self.epochs = epochs
+        self.epochs     = epochs
         self.lambda_aux = lambda_aux
 
-        # φ(x): main branch
-        self.phi = nn.Sequential(
-            nn.Linear(dim_x, hidden), nn.ReLU(),
-            nn.Linear(hidden, hidden), nn.ReLU()
-        )
-        # β(z): auxiliary branch
-        self.beta = nn.Sequential(
-            nn.Linear(dim_z, hidden), nn.ReLU()
-        )
-        # ψ: shared classifier
+        # Helper to build an MLP with a specified number of layers
+        def make_mlp(in_dim, out_dim, n_layers):
+            layers = []
+            # First layer: in_dim -> out_dim
+            layers.append(nn.Linear(in_dim, out_dim))
+            layers.append(nn.ReLU())
+            # Additional layers: out_dim -> out_dim
+            for _ in range(n_layers - 1):
+                layers.append(nn.Linear(out_dim, out_dim))
+                layers.append(nn.ReLU())
+            return nn.Sequential(*layers)
+
+        # Main branch φ on X
+        self.phi = make_mlp(dim_x, hidden, num_layers_x)
+        # Auxiliary branch β on Z
+        self.beta = make_mlp(dim_z, hidden, num_layers_z)
+        # Shared classifier ψ
         self.classifier = nn.Sequential(
-            nn.Linear(hidden, 1), nn.Sigmoid()
+            nn.Linear(hidden, 1),
+            nn.Sigmoid()
         )
 
-        # optimizers
+        # Optimizers set after constructing branches
         self.aux_opt  = optim.Adam(
             list(self.beta.parameters()) + list(self.classifier.parameters()),
             lr=lr
         )
-        self.main_opt = None  # set after aux pretraining
+        self.main_opt = None
 
-        # losses
+        # Loss functions
         self.bce = nn.BCELoss()
-        # teacher copy
         self.fixed_classifier = None
 
     def forward(self, x, z):
-        """
-        Returns two predictions:
-         - y_hat = ψ(φ(x))
-         - y_z   = ψ(β(z))
-        both as 1‐D tensors of shape (batch,)
-        """
-        s   = self.phi(x)
-        sz  = self.beta(z)
-        return self.classifier(s).view(-1), self.classifier(sz).view(-1)
+        # Compute branch outputs
+        y_x = self.classifier(self.phi(x)).view(-1)
+        y_z = self.classifier(self.beta(z)).view(-1)
+        return y_x, y_z
 
     def pretrain_aux(self, Z, y):
-        """Pretrain auxiliary branch on (Z, y)."""
-        x_dummy = torch.zeros(Z.shape[0], self.phi[0].in_features, device=Z.device)
-
-        for epoch in range(self.epochs):
+        """Pretrain auxiliary branch (β+ψ) on (Z, y)."""
+        dummy_x = torch.zeros(Z.size(0), self.phi[0].in_features, device=Z.device)
+        for _ in range(self.epochs):
             self.aux_opt.zero_grad()
-            # 2) after forward, print representation shapes
-            y_hat_x, y_hat_z = self.forward(x_dummy, Z)
-            
-            loss   = self.bce(y_hat_z, y)
+            _, y_pred_z = self.forward(dummy_x, Z)
+            loss = self.bce(y_pred_z, y)
             loss.backward()
             self.aux_opt.step()
-        # freeze β
+
+        # Freeze β parameters
         for p in self.beta.parameters():
             p.requires_grad = False
-        # copy ψ as teacher
+        # Create a teacher copy of classifier
         self.fixed_classifier = copy.deepcopy(self.classifier)
-        # create main optimizer for φ+ψ
+        # Initialize main optimizer for φ+ψ
         self.main_opt = optim.Adam(
             list(self.phi.parameters()) + list(self.classifier.parameters()),
             lr=self.aux_opt.defaults['lr']
         )
 
-    def train_model(self, X, Z, y, x_val = None, y_val = None, z_val=None, record_loss=False, early_stopping_patience=10):
-        """Train φ+ψ on (X, y) with auxiliary regularization from Z."""
-        train_loss_history, val_loss_history = [], []
-        best_val_loss = float('inf')
-        patience_counter = 0
+    def train_model(self, X, Z, y, x_val=None, z_val=None, y_val=None,
+                    record_loss=False, early_stopping_patience=10):
+        """Train main branch φ+ψ on X with auxiliary regularization from β."""
+        train_losses, val_losses = [], []
+        best_val, patience = float('inf'), 0
 
         for _ in range(self.epochs):
             self.train()
             self.main_opt.zero_grad()
-            y_hat, _ = self.forward(X, Z)
+            y_pred_x, _ = self.forward(X, Z)
             with torch.no_grad():
-                t = self.fixed_classifier(self.beta(Z)).view(-1)
-            loss = self.bce(y_hat, y) + self.lambda_aux * self.bce(y_hat, t)
+                teacher_pred = self.fixed_classifier(self.beta(Z)).view(-1)
+            loss = self.bce(y_pred_x, y) + self.lambda_aux * self.bce(y_pred_x, teacher_pred)
             loss.backward()
             self.main_opt.step()
+
             if record_loss:
-                train_loss_history.append(loss.item())
+                train_losses.append(loss.item())
 
             if x_val is not None and y_val is not None:
                 self.eval()
                 with torch.no_grad():
-                    y_val_hat, _ = self.forward(x_val, z_val)
-                    val_loss = self.bce(y_val_hat, y_val)
+                    y_val_pred, _ = self.forward(x_val, z_val)
+                    val_loss = self.bce(y_val_pred, y_val)
                     if record_loss:
-                        val_loss_history.append(val_loss.item())
-                    if val_loss.item() < best_val_loss:
-                        best_val_loss = val_loss.item()
-                        patience_counter = 0
+                        val_losses.append(val_loss.item())
+                    if val_loss.item() < best_val:
+                        best_val, patience = val_loss.item(), 0
                     else:
-                        patience_counter += 1
-                        if patience_counter >= early_stopping_patience:
+                        patience += 1
+                        if patience >= early_stopping_patience:
                             break
 
         if record_loss:
-            return train_loss_history, val_loss_history
+            return train_losses, val_losses
 
     def evaluate(self, X, y, Z):
-        """
-        Returns metrics dict including:
-          - ‘auc’
-          - precision/recall/f1 for each class
-        """
+        """Evaluate model and return AUC, precision, recall, F1 per class."""
         self.eval()
         with torch.no_grad():
-            y_hat, _ = self.forward(X, Z)
-        preds = (y_hat >= 0.5).float().cpu().numpy()
-        y_np  = y.cpu().numpy()
+            y_pred, _ = self.forward(X, Z)
+        preds = (y_pred >= 0.5).float().cpu().numpy()
+        y_np = y.cpu().numpy()
         p, r, f, _ = precision_recall_fscore_support(y_np, preds, zero_division=0)
         try:
-            auc = roc_auc_score(y_np, y_hat.cpu().numpy())
+            auc = roc_auc_score(y_np, y_pred.cpu().numpy())
         except:
             auc = 0.0
-        return {"auc":auc,
-                "p0":p[0],"r0":r[0],"f0":f[0],
-                "p1":p[1],"r1":r[1],"f1":f[1]}
+        return {
+            "auc": auc,
+            "p0": p[0], "r0": r[0], "f0": f[0],
+            "p1": p[1], "r1": r[1], "f1": f[1] 
+        }
 
 ################################################################################
 # 2) Simultaneous Two‐Loss Multi‐View Model

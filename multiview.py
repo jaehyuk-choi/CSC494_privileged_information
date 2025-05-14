@@ -170,26 +170,29 @@ def main():
 
     # Define experiments
     experiments = [
-        {
-            "name": "TwoLoss",
-            "model": MultiViewNN_TwoLoss,
-            "param_grid": {
-                "hidden": [32, 64],
-                "lr": [0.001, 0.01],
-                "epochs": [100],
-                "lambda_aux": [0.3, 0.5]
-            }
-        },
-        {
-            "name": "Simul",
-            "model": MultiViewNN_Simul,
-            "param_grid": {
-                "hidden": [32, 64],
-                "lr": [0.001, 0.01],
-                "epochs": [100],
-                "lambda_aux": [0.3, 0.5]
-            }
-        },
+        # {
+        #     "name": "TwoLoss",
+        #     "model": MultiViewNN_TwoLoss,
+        #     "param_grid": {
+        #         "hidden": [64, 128, 256],
+        #         "num_layers_x": [1, 2, 3],
+        #         "num_layers_z": [1, 2, 3],
+        #         "lr": [0.001, 0.01],
+        #         "epochs": [100, 300],
+        #         "lambda_aux": [0.3, 0.5]
+        #     }
+        # }
+        # ,
+        # {
+        #     "name": "Simul",
+        #     "model": MultiViewNN_Simul,
+        #     "param_grid": {
+        #         "hidden": [32, 64],
+        #         "lr": [0.001, 0.01],
+        #         "epochs": [100],
+        #         "lambda_aux": [0.3, 0.5]
+        #     }
+        # },
         # {
         #     "name": "MT-MLP-Simul",
         #     "model": SimultaneousMultiViewMultiTaskNN,
@@ -205,12 +208,12 @@ def main():
             "name": "MT-MLP",
             "model": MultiViewMLP,
             "param_grid": {
-                "hidden": [32, 64],
-                "num_layers_x": [3],
-                "num_layers_z": [2],
+                "hidden": [128, 256],
+                "num_layers_x": [1,2,3,4],
+                "num_layers_z": [1,2,3,4],
                 "lr": [0.001, 0.01],
                 "lambda_view": [0.3, 0.5],
-                "epochs": [100]
+                "epochs": [100, 300]
             }
         }
     ]
