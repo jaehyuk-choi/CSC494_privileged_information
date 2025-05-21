@@ -6,97 +6,96 @@ This repository accompanies the research project **"Leveraging LLMs to Generate 
 
 ## 📌 Overview
 
-Predictive modeling in clinical settings is often limited by small, imbalanced datasets. Rather than using LLMs as direct predictors, this project investigates their utility in generating **privileged information** — synthetic features used exclusively at training time.
+Predictive modeling in clinical settings is often limited by small, imbalanced datasets. Rather than using LLMs as direct predictors, this project investigates their utility in generating **privileged information** — synthetic features used exclusively at training time to guide the model.
 
 ---
 
 ## ⚙️ Methodology
 
 1. **Synthetic Data Generation**  
-   LLMs (LLaMA-8B, LLaMA-70B) are prompted to simulate clinical reasoning and generate side information.
+   - LLMs (LLaMA-8B, LLaMA-70B) are prompted to simulate clinical reasoning and generate side information (e.g., HbA1c predictions, risk scores).
 
 2. **Pattern-Based Integration**  
    LLM-generated data is integrated through four training paradigms:
 
-   - **Direct**  
-     The LLM-generated scalar value (e.g., predicted HbA1c) is directly appended to the input feature vector during training.
-   - **Multi-task**  
-     The model is trained to solve the main classification task along with multiple auxiliary tasks using LLM-generated labels (e.g., `health_1_10`, `diabetes_risk_score`, `has_diabetes`). These tasks share a common encoder, enabling richer representation learning.
-   - **Multi-view**  
-     The original clinical features (view1) and LLM-generated side information (view2) are processed separately, simulating a multi-view learning scenario.
-   - **Pairwise similarity**  
-     The LLM is prompted to generate similarity scores between patient pairs. These scores guide the model to learn instance-level relationships through pairwise inputs (e.g., patient A is more similar to patient B than to patient C).
-   - Hybrid strategies (e.g., Direct + Multi-task) are also implemented.
+   - **Direct**:  
+     LLM-generated scalar features (e.g., predicted HbA1c) are directly appended to the input feature vector during training only.
+
+   - **Multi-task**:  
+     The model is jointly trained on the main task and auxiliary LLM-generated labels (e.g., `health_1_10`, `risk_score`, `has_diabetes`) with a shared encoder.
+
+   - **Multi-view**:  
+     Original and LLM-generated features are processed via separate encoders (view1/view2). Only view1 is available during testing.
+
+   - **Pairwise Similarity**:  
+     The LLM generates similarity scores between patient pairs to supervise models with pairwise inputs.
+
+   - *Hybrid strategies* (e.g., Direct + Multi-task) are also implemented.
 
 3. **Training & Evaluation**  
-   Models are trained using various strategies including:
-   - Simultaneous training
-   - Decoupled training
-   - Pretrained then Finetuned training
+   Multiple strategies are used:
+   - Simultaneous training  
+   - Decoupled training  
+   - Pretraining followed by fine-tuning
 
 ---
 
 ## 🧪 Datasets
 
 - **UCI Diabetes Dataset**  
-  Predicts diabetes onset from patient lifestyle and demographic factors.
+  Predicts diabetes onset based on demographic and lifestyle features.
 
 - **MIMIC-IV Dataset**  
-  Predicts in-hospital mortality using ICU time-series data.
+  Predicts in-hospital mortality using ICU patient time-series data.
 
 ---
 
 ## 📁 Directory Structure & Usage
 
-This repository is organized to support experimentation across multiple LUPI-based learning paradigms.
-
 ```bash
 CSC494_PRIVILEGED_INFORMATION/
-├── data/                # Preprocessing scripts for each pattern (Direct, Multitask, etc.)
-├── model/               # Model definitions for each pattern and training strategy
-├── prompting/           # LLM-generated side information and pairwise similarity data
-├── img/                 # Visualizations (optional)
-├── utils.py             # Shared utilities (grid search, run_experiments function)
+├── data/                # Preprocessing scripts for each pattern
+├── model/               # Model definitions for each integration pattern
+├── prompting/           # LLM-generated side info & similarity data
+├── img/                 # Visualizations (Train & Validation Loss)
+├── utils.py             # Shared functions (grid search, experiment runner)
 ├── direct.py            # Train using Direct pattern
 ├── multitask.py         # Train using Multi-task pattern
 ├── multiview.py         # Train using Multi-view pattern
-├── pairwise.py          # Train using Pairwise similarity pattern
-├── explore_data.py      # Exploratory data analysis
-└── *.csv                # Results files for each pattern
+├── pairwise.py          # Train using Pairwise pattern
+├── explore_data.py      # EDA and dataset summary
+└── *.csv                # Evaluation results
 ```
 
 ---
-
 ## 🚀 Getting Started
 
-Install all dependencies:
+Install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
----
-
 ## ⚙️ File Roles & Execution Guide
 
+```text
 data/
-    Contains dataset preprocessing modules tailored to each learning pattern:
-    - baseline_data.py
-    - direct_data.py
-    - multitask_data.py
-    - multiview_data.py
-    - pairwise_data.py
+    Preprocessing modules for each learning pattern:
+        - baseline_data.py
+        - direct_data.py
+        - multitask_data.py
+        - multiview_data.py
+        - pairwise_data.py
 
 model/
-    Implements model architectures specific to each integration pattern and training regime:
-    - Direct (with/without residuals or decompression)
-    - Multi-task with attention-based heads
-    - Multi-view dual-encoder models
-    - Pairwise MLP similarity models
+    Architecture implementations by pattern:
+        - Direct (with/without residuals or decompression)
+        - Multi-task with attention-based heads
+        - Multi-view dual-encoder models
+        - Pairwise MLP similarity models
 
 utils.py
-    Provides shared functionality:
-    - grid_search: performs hyperparameter search over validation set
-    - run_experiments: executes 10 randomized training iterations for robust evaluation
-
-
+    Shared functionality:
+        - grid_search: hyperparameter tuning over validation set
+        - run_experiments: runs 10 randomized training iterations for evaluation
+```
