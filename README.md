@@ -13,7 +13,7 @@ Predictive modeling in clinical settings is often limited by small, imbalanced d
 ## ⚙️ Methodology
 
 1. **Synthetic Data Generation**  
-   - LLMs (LLaMA-8B, LLaMA-70B) are prompted to simulate clinical reasoning and generate side information (e.g., HbA1c predictions, risk scores).
+   - LLMs (LLaMA-8B, LLaMA-70B) are prompted to simulate clinical reasoning and generate privileged information (e.g., HbA1c predictions, risk scores).
 
 2. **Pattern-Based Integration**  
    LLM-generated data is integrated through four training paradigms:
@@ -56,7 +56,7 @@ Predictive modeling in clinical settings is often limited by small, imbalanced d
 CSC494_PRIVILEGED_INFORMATION/
 ├── data/                # Preprocessing scripts for each pattern
 ├── model/               # Model definitions for each integration pattern
-├── prompting/           # LLM-generated side info & similarity data
+├── prompting/           # LLM-generated privileged info & similarity data
 ├── img/                 # Visualizations (Train & Validation Loss)
 ├── utils.py             # Shared functions (grid search, experiment runner)
 ├── direct.py            # Train using Direct pattern
@@ -74,28 +74,4 @@ Install dependencies:
 
 ```bash
 pip install -r requirements.txt
-```
-
-## ⚙️ File Roles & Execution Guide
-
-```text
-data/
-    Preprocessing modules for each learning pattern:
-        - baseline_data.py
-        - direct_data.py
-        - multitask_data.py
-        - multiview_data.py
-        - pairwise_data.py
-
-model/
-    Architecture implementations by pattern:
-        - Direct (with/without residuals or decompression)
-        - Multi-task with attention-based heads
-        - Multi-view dual-encoder models
-        - Pairwise MLP similarity models
-
-utils.py
-    Shared functionality:
-        - grid_search: hyperparameter tuning over validation set
-        - run_experiments: runs 10 randomized training iterations for evaluation
 ```
