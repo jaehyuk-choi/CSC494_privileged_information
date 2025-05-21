@@ -1,13 +1,13 @@
 # CSC494_privileged_information
 # CSC494 – Leveraging LLMs to Generate Privileged Information for Clinical Predictive Tasks
 
-This repository contains the implementation of a research project exploring how large language models (LLMs) can enhance clinical predictive models by generating auxiliary (privileged) information during training. This follows the Learning Using Privileged Information (LUPI) framework.
+This repository contains the implementation of a research project exploring how large language models (LLMs) can enhance clinical predictive models by generating auxiliary (privileged) information during training.
 
 ---
 
 ## 🧠 Project Summary
 
-The goal is to improve clinical predictions in data-scarce settings using LLMs to generate useful side information during training — but not at inference time. Various architectures and learning paradigms (direct, multitask, multiview, pairwise similarity) are tested across different datasets and LLM configurations (8B, 70B).
+The goal is to improve clinical predictions in data-scarce settings using LLMs to generate useful side information during training — but not at inference time. Various architectures and learning patterns (direct, multitask, multiview, pairwise similarity) are tested across different datasets and LLM configurations (8B, 70B).
 
 ---
 
