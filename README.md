@@ -1,6 +1,6 @@
 # Leveraging LLMs to Generate Privileged Information for Clinical Predictive Tasks
 
-This repository accompanies the research project **"Leveraging LLMs to Generate Privileged Information for Clinical Predictive Tasks"** by **Jaehyuk Choi (April 2025)**. The project explores how large language models (LLMs) can enhance predictive modeling in healthcare by generating synthetic, context-rich auxiliary data used only during training.
+This repository accompanies the research project **"Leveraging LLMs to Generate Privileged Information for Clinical Predictive Tasks"** by **David Pellow and Jaehyuk Choi (April 2025)**. The project explores how large language models (LLMs) can enhance predictive modeling in healthcare by generating synthetic, context-rich auxiliary data used only during training.
 
 ---
 
