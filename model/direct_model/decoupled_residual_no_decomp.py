@@ -143,6 +143,7 @@ class DirectDecoupledResidualNoDecomp(nn.Module):
         self.eval()
         with torch.no_grad():
             _, y_pred = self.forward(x)
+            y = y.view(-1)
             y_pred=y_pred.view(-1)
             preds = (y_pred >= 0.5).float()
             try:
@@ -158,4 +159,4 @@ class DirectDecoupledResidualNoDecomp(nn.Module):
             "bce_loss": bce,
             "p0": p[0], "r0": r[0], "f0": f[0],
             "p1": p[1], "r1": r[1], "f1": f[1]
-        }
+        } 

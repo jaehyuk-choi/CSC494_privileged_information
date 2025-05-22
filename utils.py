@@ -463,8 +463,6 @@ def grid_search_multiview(model_class, param_grid, X, Z, y, cv=3):
             # Pretrain auxiliary branch if available
             if hasattr(model, 'pretrain_aux'):
                 model.pretrain_aux(z_tr, y_tr)
-            print(f"[DEBUG] Z shape: {z_tr.shape}")
-            print(f"[DEBUG] Model expects dim_z: {Z.shape[1]}") 
             # Main training
             model.train_model(x_tr, z_tr, y_tr, record_loss=False)
 
@@ -480,6 +478,516 @@ def grid_search_multiview(model_class, param_grid, X, Z, y, cv=3):
             best_params = params
     return best_params, best_auc
 
+
+# def run_experiments_multiview(
+#     model_class,
+#     method_name,
+#     num_runs,
+#     best_params,
+#     train_X,
+#     train_Z,
+#     train_y,
+#     test_X,
+#     test_Z,
+#     test_y
+# ):
+#     """
+#     Run multiple random-sampled training runs for a multi-view model.
+
+#     For each run:
+#       - Balanced sampling of up to 250 examples per class
+#       - 80/20 train/validation split
+#       - Pretrain auxiliary if supported
+#       - Train with recording losses
+#       - Plot and save loss curves
+#       - Evaluate on held-out test set
+
+#     Returns:
+#         metrics_list: list of dicts with 'auc' per run
+#     """
+#     metrics = []
+#     # gather class indices
+#     y_np = train_y.cpu().numpy()
+#     idx_pos = np.where(y_np == 1)[0].tolist()
+#     idx_neg = np.where(y_np == 0)[0].tolist()
+#     test_pool_size = len(test_X) 
+
+#     for run in range(1, num_runs + 1):
+#         # balanced sampling
+#         samp1 = random.sample(idx_pos, min(len(idx_pos), 250))
+#         samp0 = random.sample(idx_neg, min(len(idx_neg), 250))
+#         idx_train = samp1 + samp0
+
+#         x_pool = train_X[idx_train]
+#         z_pool = train_Z[idx_train]
+#         y_pool = train_y[idx_train]
+
+#         test_indices = random.sample(range(test_pool_size), 125)
+#         x_test_run = test_X[test_indices]
+#         y_test_run = test_y[test_indices]
+#         z_test_run = test_Z[test_indices]
+
+#         # train/val split
+#         perm = torch.randperm(len(x_pool))
+#         split = int(0.8 * len(x_pool))
+#         tr_idx, va_idx = perm[:split], perm[split:]
+#         x_tr, z_tr, y_tr = x_pool[tr_idx], z_pool[tr_idx], y_pool[tr_idx]
+#         x_va, z_va, y_va = x_pool[va_idx], z_pool[va_idx], y_pool[va_idx]
+
+#         # instantiate model
+#         sig = inspect.signature(model_class.__init__).parameters
+#         init_kwargs = {}
+#         if 'dim_x' in sig:
+#             init_kwargs['dim_x'] = train_X.shape[1]
+#         if 'dim_z' in sig:
+#             init_kwargs['dim_z'] = train_Z.shape[1]
+#         for k, v in best_params.items():
+#             if k in sig:
+#                 init_kwargs[k] = v
+#         model = model_class(**init_kwargs)
+
+#         # pretrain auxiliary if available
+#         if hasattr(model, 'pretrain_aux'):
+#             model.pretrain_aux(z_tr, y_tr)
+
+#         # train with loss recording
+#         losses = model.train_model(x_tr, z_tr, y_tr, record_loss=True)
+#         train_losses, val_losses = losses
+
+#         # plot losses
+#         filename = f"img/{method_name}_run{run}.png"
+#         plot_loss_curve(train_losses, val_losses, filename)
+
+#         # evaluate on test
+#         # model.eval()
+#         # with torch.no_grad():
+#         #     pred = model.forward(test_X, test_Z)[0]
+#         # auc = roc_auc_score(test_y.cpu().numpy(), pred.cpu().numpy())
+#         # metrics.append({'auc': auc})
+#         # print(f"{method_name} Run {run} AUC: {auc:.4f}")
+#         metric = model.evaluate(x_test_run, y_test_run, z_test_run)
+#         # metric = model.evaluate(test_X, test_y, test_Z)
+#         metrics.append(metric)
+#         print(metric)
+#     return metrics
+
+# def run_experiments_baseline(
+#     model_class,
+#     method_name,
+#     num_runs,
+#     best_params,
+#     train_x_pool,
+#     train_y_pool,
+#     test_x_pool,
+#     test_y_pool):
+#     metrics_list = []
+#     # compute class indices once
+#     train_df = pd.DataFrame(train_x_pool.numpy())
+#     train_df['Diabetes_binary'] = train_y_pool.numpy()
+#     class1_indices = train_df[train_df['Diabetes_binary'] == 1].index.tolist()
+#     class0_indices = train_df[train_df['Diabetes_binary'] == 0].index.tolist()
+#     test_pool_size = len(test_x_pool)
+
+#     # pre‑grab the __init__ signature
+#     sig = inspect.signature(model_class.__init__).parameters
+
+#     for run_idx in range(1, num_runs + 1):
+#         # 1) Balanced sampling
+#         sampled1 = random.sample(class1_indices, min(250, len(class1_indices)))
+#         sampled0 = random.sample(class0_indices, min(250, len(class0_indices)))
+#         train_idx = sampled1 + sampled0
+#         x_train = train_x_pool[train_idx]
+#         y_train = train_y_pool[train_idx]
+#         # 2) Pull out a random test subset
+#         test_idx = random.sample(range(test_pool_size), min(125, test_pool_size))
+#         x_test = test_x_pool[test_idx]
+#         y_test = test_y_pool[test_idx]
+#         # 3) Instantiate the model dynamically:
+#         init_kwargs = {}
+#         if 'input_dim' in sig:
+#             init_kwargs['input_dim'] = x_train.shape[1]
+#         # feed only the keys that actually appear in its __init__
+#         for k, v in best_params.items():
+#             if k in sig:
+#                 init_kwargs[k] = v
+#         model = model_class(**init_kwargs)
+
+#         # 4) Split train→val (80/20)
+#         perm = np.random.permutation(len(x_train)); split=int(0.8*len(x_train))
+#         tr, va = perm[:split], perm[split:]
+#         x_tr, y_tr = x_train[tr], y_train[tr]
+#         x_va, y_va = x_train[va], y_train[va]
+#         train_losses, val_losses = model.train_model(
+#             x_tr, y_tr,
+#             x_val=x_va, y_val=y_va,
+#             early_stopping_patience=10,
+#             record_loss=True
+#         )
+#         # 5) Plot loss curves
+#         os.makedirs("img", exist_ok=True)
+#         fn = f"img/{method_name}_run{run_idx}.png"
+#         plt.figure(figsize=(8,6))
+#         plt.plot(train_losses, label="Train BCE Loss")
+#         plt.plot(val_losses,   label="Val   BCE Loss")
+#         plt.xlabel("Epoch")
+#         plt.ylabel("BCE Loss")
+#         plt.title(f"{method_name} run {run_idx}")
+#         plt.legend()
+#         plt.savefig(fn)
+#         plt.close()
+
+#         # 6) Evaluate
+#         metrics = model.evaluate(x_test, y_test)
+#         print(f"Run {run_idx} test metrics:", metrics)
+#         metrics_list.append(metrics)
+#     print("-----", metrics_list)
+#     return metrics_list
+
+# # def run_experiments(
+# #     model_class,
+# #     method_name,
+# #     num_runs,
+# #     best_params,
+# #     train_x_pool,
+# #     train_y_pool,
+# #     test_x_pool,
+# #     test_y_pool,
+# #     is_multitask=False,
+# #     train_aux1_pool=None,
+# #     train_aux2_pool=None,
+# #     train_aux3_pool=None,
+# # ):
+# #     metrics_list = []
+# #     # compute class indices once
+# #     train_df = pd.DataFrame(train_x_pool.numpy())
+# #     train_df['Diabetes_binary'] = train_y_pool.numpy()
+# #     class1_indices = train_df[train_df['Diabetes_binary'] == 1].index.tolist()
+# #     class0_indices = train_df[train_df['Diabetes_binary'] == 0].index.tolist()
+# #     test_pool_size = len(test_x_pool)
+
+# #     # pre‑grab the __init__ signature
+# #     sig = inspect.signature(model_class.__init__).parameters
+
+# #     for run_idx in range(1, num_runs + 1):
+# #         # 1) Balanced sampling
+# #         sampled1 = random.sample(class1_indices, 250)
+# #         print("class1_indices",sampled1)
+# #         sampled0 = random.sample(class0_indices, 250)
+# #         train_idx = sampled1 + sampled0
+# #         x_train = train_x_pool[train_idx]
+# #         y_train = train_y_pool[train_idx]
+
+# #         aux1_train = train_aux1_pool[train_idx]
+# #         aux2_train = train_aux2_pool[train_idx]
+# #         aux3_train = train_aux3_pool[train_idx]
+
+# #         # 2) Pull out a random test subset
+# #         test_idx = random.sample(range(test_pool_size), min(125, test_pool_size))
+# #         x_test = test_x_pool[test_idx]
+# #         y_test = test_y_pool[test_idx]
+
+# #         # 3) Instantiate the model dynamically:
+# #         init_kwargs = {}
+# #         init_kwargs['input_dim'] = x_train.shape[1]
+# #         # feed only the keys that actually appear in its __init__
+# #         for k, v in best_params.items():
+# #             if k in sig:
+# #                 init_kwargs[k] = v
+# #         model = model_class(**init_kwargs)
+
+# #         # 4) Split train→val (80/20)
+# #         perm = np.random.permutation(len(x_train)); split=int(0.8*len(x_train))
+# #         tr, va = perm[:split], perm[split:]
+# #         x_tr, y_tr = x_train[tr], y_train[tr]
+# #         x_va, y_va = x_train[va], y_train[va]
+# #         if is_multitask:
+# #             a1_tr, a2_tr, a3_tr = aux1_train[tr], aux2_train[tr], aux3_train[tr]
+# #             a1_va, a2_va, a3_va = aux1_train[va], aux2_train[va], aux3_train[va]
+# #             res = model.train_model(
+# #                 x_tr, y_tr, a1_tr, a2_tr, a3_tr,
+# #                 x_val=x_va, main_y_val=y_va,
+# #                 early_stopping_patience=10,
+# #                 record_loss=True
+# #             )
+# #         if isinstance(res, tuple) and len(res) == 3:
+# #             _, train_losses, val_losses = res
+# #         else:
+# #             train_losses, val_losses = res
+
+# #         # 5) Plot loss curves
+# #         os.makedirs("img", exist_ok=True)
+# #         fn = f"img/{method_name}_run{run_idx}.png"
+# #         plt.figure(figsize=(8,6))
+# #         plt.plot(train_losses, label="Train BCE Loss")
+# #         plt.plot(val_losses,   label="Val   BCE Loss")
+# #         plt.xlabel("Epoch")
+# #         plt.ylabel("BCE Loss")
+# #         plt.title(f"{method_name} run {run_idx}")
+# #         plt.legend()
+# #         plt.savefig(fn)
+# #         plt.close()
+
+# #         # 6) Evaluate
+# #         metrics = model.evaluate(x_test, y_test)
+# #         print(f"Run {run_idx} test metrics:", metrics)
+# #         metrics_list.append(metrics)
+
+# #     return metrics_list
+
+# def run_experiments(model_class, method_name, num_runs, best_params,
+#                     train_x_pool, train_y_pool, test_x_pool, test_y_pool,
+#                     optimizer_fixed="adam", epochs_fixed=300,
+#                     is_multitask=False, train_aux1_pool=None, train_aux2_pool=None, train_aux3_pool=None):
+#     metrics_list = []
+#     class_counts = []
+#     train_df = pd.DataFrame(train_x_pool.numpy())
+#     train_df['Diabetes_binary'] = train_y_pool.numpy()
+#     class1_indices = train_df[train_df['Diabetes_binary'] == 1].index.tolist()
+#     class0_indices = train_df[train_df['Diabetes_binary'] == 0].index.tolist()
+#     test_pool_size = len(test_x_pool)
+    
+#     lr_val = best_params.get('lr', 0.01)  # default fallback
+#     hidden_dim_val = best_params.get('hidden_dim', 64)
+#     num_layers_val = best_params.get('num_layers', 1)
+#     lambda_aux_val = best_params.get('lambda_aux', 0.3)
+#     # lr_val = best_params['lr']
+#     # hidden_dim_val = best_params['hidden_dim']
+#     # num_layers_val = best_params['num_layers']
+#     # lambda_aux_val = best_params['lambda_aux'] if 'lambda_aux' in best_params else 0.3
+#     for run_idx in range(num_runs):
+#         sampled1 = random.sample(class1_indices, 250)
+#         # print(sampled1)
+#         sampled0 = random.sample(class0_indices, 250)
+#         train_idx = sampled1 + sampled0
+#         x_train_run = train_x_pool[train_idx]
+#         y_train_run = train_y_pool[train_idx]
+#         n_pos = int((y_train_run == 1).sum().item())
+#         n_neg = int((y_train_run == 0).sum().item())
+#         class_counts.append({
+#             'run': run_idx+1,
+#             'n_neg': n_neg,
+#             'n_pos': n_pos
+#         })
+#         print(f"Run {run_idx+1}: negative={n_neg}, positive={n_pos}")
+
+#         if is_multitask:
+#             aux1_train_run = train_aux1_pool[train_idx]
+#             aux2_train_run = train_aux2_pool[train_idx]
+#             aux3_train_run = train_aux3_pool[train_idx]
+#         # ─────────────────────────────────────────────────────────        
+#         # Randomly select 125 samples from the test pool
+#         test_indices = random.sample(range(test_pool_size), 125)
+#         x_test_run = test_x_pool[test_indices]
+#         y_test_run = test_y_pool[test_indices]
+#         print(model_class.__name__)
+#         if model_class.__name__ == "MultiTaskLogisticRegression":
+#             model = model_class(
+#                 input_dim=x_train_run.shape[1],
+#                 lr=lr_val,
+#                 epochs=epochs_fixed,
+#                 optimizer_type=optimizer_fixed
+#             )
+#         elif model_class.__name__ == "MultiTaskNN_PretrainFinetuneExtended":
+#             model = model_class(
+#                 input_dim=x_train_run.shape[1],
+#                 hidden_dim=best_params['hidden_dim'],
+#                 num_layers=best_params['num_layers'],
+#                 lambda_aux=best_params['lambda_aux'],
+#                 lr_pre=best_params['lr_pre'],
+#                 lr_fine=best_params['lr_fine'],
+#                 pre_epochs=best_params['pre_epochs'],
+#                 fine_epochs=best_params['fine_epochs']
+#             )
+#         elif model_class.__name__ == "MultiTaskNN_Decoupled":
+#             model = model_class(
+#                 input_dim=x_train_run.shape[1],
+#                 hidden_dim=best_params['hidden_dim'],
+#                 num_layers=best_params['num_layers'],
+#                 lambda_aux=best_params['lambda_aux'],
+#                 lr=best_params['lr'],
+#                 pre_epochs=best_params.get('pre_epochs', 100),
+#                 main_epochs=best_params.get('fine_epochs', 100)
+#             )
+#         else:  # MultiTaskNN
+#             model = model_class(
+#                 input_dim=x_train_run.shape[1],
+#                 hidden_dim=hidden_dim_val,
+#                 num_layers=num_layers_val,
+#                 optimizer_type=optimizer_fixed,
+#                 lr=lr_val,
+#                 epochs=epochs_fixed,
+#                 lambda_aux=lambda_aux_val
+#             )
+#         # model = model_class(
+#         #     input_dim=x_train_run.shape[1],
+#         #     hidden_dim=hidden_dim_val,
+#         #     num_layers=num_layers_val,
+#         #     optimizer_type=optimizer_fixed,
+#         #     lr=lr_val,
+#         #     epochs=epochs_fixed,
+#         #     lambda_aux=lambda_aux_val
+#         #     )
+        
+#         # Split training run data into training and validation sets (80/20 split)
+#         indices = list(range(len(x_train_run)))
+#         random.shuffle(indices)
+#         split = int(0.8 * len(indices))
+#         train_idx, val_idx = indices[:split], indices[split:]
+#         x_train_sub = x_train_run[train_idx]
+#         y_train_sub = y_train_run[train_idx]
+#         x_val_sub = x_train_run[val_idx]
+#         y_val_sub = y_train_run[val_idx]
+        
+#         aux1_train_sub = aux1_train_run[train_idx]
+#         aux2_train_sub = aux2_train_run[train_idx]
+#         aux3_train_sub = aux3_train_run[train_idx]
+#         aux1_val_sub = aux1_train_run[val_idx]
+#         aux2_val_sub = aux2_train_run[val_idx]
+#         aux3_val_sub = aux3_train_run[val_idx]
+#         loss_data = model.train_model(x_train_sub, y_train_sub, aux1_train_sub, aux2_train_sub, aux3_train_sub,
+#                                           x_val=x_val_sub, main_y_val=y_val_sub, aux1_val=aux1_val_sub, aux2_val=aux2_val_sub, aux3_val=aux3_val_sub,
+#                                           early_stopping_patience=30, record_loss=True)
+#         # loss_data = model.train_model(x_train_sub, y_train_sub,
+#         #                                   x_val=x_val_sub, y_val=y_val_sub,
+#         #                                   early_stopping_patience=30, record_loss=True)
+#         if model.__class__.__name__ == "MultiTaskNN_PretrainFinetuneExtended":
+#             _, train_losses, val_losses = loss_data
+#         else:
+#             train_losses, val_losses = loss_data
+
+#         # train_losses, val_losses = loss_data
+        
+#         if not os.path.exists("img"):
+#             os.makedirs("img")
+#         plot_filename = os.path.join("img", f"MT+MLP_7B_wosplit{run_idx+1}.png")
+#         plt.figure(figsize=(8,6))
+#         plt.plot(train_losses, label="Train BCE Loss")
+#         plt.plot(val_losses, label="Validation BCE Loss")
+#         plt.xlabel("Epoch")
+#         plt.ylabel("BCE Loss")
+#         plt.title("Train vs Validation BCE Loss")
+#         plt.legend()
+#         plt.savefig(plot_filename)
+#         plt.show()
+        
+#         # Evaluate model on test set
+#         metrics = model.evaluate(x_test_run, y_test_run)
+#         metrics_list.append(metrics)
+#         print(metrics)
+#     return metrics_list
+
+# # def run_experiments(model_class, method_name, num_runs, best_params,
+# #                     train_x_pool, train_y_pool, test_x_pool, test_y_pool,
+# #                     is_multitask=False, train_aux1_pool=None, train_aux2_pool=None, train_aux3_pool=None):
+# #     metrics_list = []
+# #     for run in range(1, num_runs + 1):
+# #         idx1 = train_y_pool.nonzero(as_tuple=True)[0]
+# #         idx0 = (train_y_pool == 0).nonzero(as_tuple=True)[0]
+# #         sampled_idx = torch.cat([
+# #             idx1[torch.randperm(len(idx1))[:250]],
+# #             idx0[torch.randperm(len(idx0))[:250]]
+# #         ])
+# #         x_train, y_train = train_x_pool[sampled_idx], train_y_pool[sampled_idx]
+
+# #         if is_multitask:
+# #             aux1 = train_aux1_pool[sampled_idx]
+# #             aux2 = train_aux2_pool[sampled_idx]
+# #             aux3 = train_aux3_pool[sampled_idx]
+
+# #         split = int(0.8 * len(x_train))
+# #         perm = torch.randperm(len(x_train))
+# #         tr_idx, val_idx = perm[:split], perm[split:]
+
+# #         sig = inspect.signature(model_class.__init__).parameters
+# #         if 'input_dim' in sig:
+# #             model = model_class(input_dim=x_train.shape[1], **best_params)
+# #         else:
+# #             model = model_class(**best_params)
+
+# #         if is_multitask:
+# #             train_losses, val_losses = model.train_model(
+# #                 x_train[tr_idx], y_train[tr_idx],
+# #                 aux1[tr_idx], aux2[tr_idx], aux3[tr_idx],
+# #                 x_val=x_train[val_idx], main_y_val=y_train[val_idx],
+# #                 aux1_val=aux1[val_idx], aux2_val=aux2[val_idx], aux3_val=aux3[val_idx],
+# #                 early_stopping_patience=10, record_loss=True
+# #             )
+# #         else:
+# #             train_losses, val_losses = model.train_model(
+# #                 x_train[tr_idx], y_train[tr_idx],
+# #                 x_val=x_train[val_idx], y_val=y_train[val_idx],
+# #                 early_stopping_patience=10, record_loss=True
+# #             )
+
+# #         plot_loss_curve(train_losses, val_losses, f"img/{method_name}_run{run}.png")
+
+# #         metrics = model.evaluate(test_x_pool, test_y_pool)
+# #         print(f"Run {run}: {metrics}")
+# #         metrics_list.append(metrics)
+
+# #     return metrics_list
+
+# def run_experiments_direct(
+#     model_class,
+#     best_params,
+#     train_x, train_y, train_z,
+#     test_x, test_y,
+#     num_runs=10,
+#     sample_size_per_class=250,
+#     early_stopping=10
+# ):
+#     """
+#     Execute multiple runs for a direct pattern model using best hyperparameters.
+
+#     Args:
+#         model_class: class, same as for grid_search_direct.
+#         best_params: dict, hyperparameters from grid search.
+#         train_x, train_y, train_z: torch.Tensor pools for training (N_train, D), (N_train,), (N_train,).
+#         test_x, test_y: torch.Tensor for final evaluation.
+#         num_runs: int, number of random balanced sampling experiments.
+#         sample_size_per_class: int, how many examples per class to sample.
+#         early_stopping: int, patience passed to train_model.
+
+#     Returns:
+#         metrics_list: list of dicts from model.evaluate() across runs.
+#     """
+#     metrics_list = []
+#     # Identify indices for each class
+#     train_df = pd.DataFrame(train_x.numpy())
+#     train_df['Diabetes_binary'] = train_y.numpy()
+#     class1_indices = train_df[train_df['Diabetes_binary'] == 1].index.tolist()
+#     class0_indices = train_df[train_df['Diabetes_binary'] == 0].index.tolist()
+#     test_pool_size = len(test_x)
+#     for run_idx in range(num_runs):
+#         # Balanced sampling
+#         sampled1 = random.sample(class1_indices, 250)
+#         sampled0 = random.sample(class0_indices, 250)
+#         train_idx = sampled1 + sampled0
+#         x_sel, y_sel, z_sel = train_x[train_idx], train_y[train_idx], train_z[train_idx]
+#         # Split into train/val
+#         perm = np.random.permutation(len(train_idx)); split=int(0.8*len(train_idx))
+#         tr_i, va_i = perm[:split], perm[split:]
+#         # print(tr_i)
+#         test_indices = random.sample(range(test_pool_size), 125)
+
+#         x_test_run = test_x[test_indices]
+#         y_test_run = test_y[test_indices]
+
+#         model = model_class(input_dim=train_x.shape[1], **best_params)
+#         train_losses, val_losses = model.train_model(
+#             x_sel[tr_i], y_sel[tr_i], z_sel[tr_i],
+#             x_val=x_sel[va_i], y_val=y_sel[va_i], z_val=z_sel[va_i],
+#             early_stopping=early_stopping,
+#             record_loss=True
+#         )
+#         plot_loss_curve(train_losses, val_losses, f"img/{model_class}_run{run_idx}.png")
+
+#         # Evaluate on test set
+#         metrics = model.evaluate(x_test_run, y_test_run)
+#         metrics_list.append(metrics)
+#         print(f"Run {run_idx}: {metrics}")
+
+#     return metrics_list
 
 def run_experiments_multiview(
     model_class,
@@ -512,6 +1020,7 @@ def run_experiments_multiview(
     y_np = train_y.cpu().numpy()
     idx_pos = np.where(y_np == 1)[0].tolist()
     idx_neg = np.where(y_np == 0)[0].tolist()
+    test_pool_size = len(test_X) 
 
     for run in range(1, num_runs + 1):
         # balanced sampling
@@ -522,6 +1031,11 @@ def run_experiments_multiview(
         x_pool = train_X[idx_train]
         z_pool = train_Z[idx_train]
         y_pool = train_y[idx_train]
+
+        test_indices = random.sample(range(test_pool_size), 125)
+        x_test_run = test_X[test_indices]
+        y_test_run = test_y[test_indices]
+        z_test_run = test_Z[test_indices]
 
         # train/val split
         perm = torch.randperm(len(x_pool))
@@ -561,7 +1075,8 @@ def run_experiments_multiview(
         # auc = roc_auc_score(test_y.cpu().numpy(), pred.cpu().numpy())
         # metrics.append({'auc': auc})
         # print(f"{method_name} Run {run} AUC: {auc:.4f}")
-        metric = model.evaluate(test_X, test_y, test_Z)
+        metric = model.evaluate(x_test_run, y_test_run, z_test_run)
+        # metric = model.evaluate(test_X, test_y, test_Z)
         metrics.append(metric)
         print(metric)
     return metrics
@@ -638,97 +1153,6 @@ def run_experiments_baseline(
     print("-----", metrics_list)
     return metrics_list
 
-# def run_experiments(
-#     model_class,
-#     method_name,
-#     num_runs,
-#     best_params,
-#     train_x_pool,
-#     train_y_pool,
-#     test_x_pool,
-#     test_y_pool,
-#     is_multitask=False,
-#     train_aux1_pool=None,
-#     train_aux2_pool=None,
-#     train_aux3_pool=None,
-# ):
-#     metrics_list = []
-#     # compute class indices once
-#     train_df = pd.DataFrame(train_x_pool.numpy())
-#     train_df['Diabetes_binary'] = train_y_pool.numpy()
-#     class1_indices = train_df[train_df['Diabetes_binary'] == 1].index.tolist()
-#     class0_indices = train_df[train_df['Diabetes_binary'] == 0].index.tolist()
-#     test_pool_size = len(test_x_pool)
-
-#     # pre‑grab the __init__ signature
-#     sig = inspect.signature(model_class.__init__).parameters
-
-#     for run_idx in range(1, num_runs + 1):
-#         # 1) Balanced sampling
-#         sampled1 = random.sample(class1_indices, 250)
-#         print("class1_indices",sampled1)
-#         sampled0 = random.sample(class0_indices, 250)
-#         train_idx = sampled1 + sampled0
-#         x_train = train_x_pool[train_idx]
-#         y_train = train_y_pool[train_idx]
-
-#         aux1_train = train_aux1_pool[train_idx]
-#         aux2_train = train_aux2_pool[train_idx]
-#         aux3_train = train_aux3_pool[train_idx]
-
-#         # 2) Pull out a random test subset
-#         test_idx = random.sample(range(test_pool_size), min(125, test_pool_size))
-#         x_test = test_x_pool[test_idx]
-#         y_test = test_y_pool[test_idx]
-
-#         # 3) Instantiate the model dynamically:
-#         init_kwargs = {}
-#         init_kwargs['input_dim'] = x_train.shape[1]
-#         # feed only the keys that actually appear in its __init__
-#         for k, v in best_params.items():
-#             if k in sig:
-#                 init_kwargs[k] = v
-#         model = model_class(**init_kwargs)
-
-#         # 4) Split train→val (80/20)
-#         perm = np.random.permutation(len(x_train)); split=int(0.8*len(x_train))
-#         tr, va = perm[:split], perm[split:]
-#         x_tr, y_tr = x_train[tr], y_train[tr]
-#         x_va, y_va = x_train[va], y_train[va]
-#         if is_multitask:
-#             a1_tr, a2_tr, a3_tr = aux1_train[tr], aux2_train[tr], aux3_train[tr]
-#             a1_va, a2_va, a3_va = aux1_train[va], aux2_train[va], aux3_train[va]
-#             res = model.train_model(
-#                 x_tr, y_tr, a1_tr, a2_tr, a3_tr,
-#                 x_val=x_va, main_y_val=y_va,
-#                 early_stopping_patience=10,
-#                 record_loss=True
-#             )
-#         if isinstance(res, tuple) and len(res) == 3:
-#             _, train_losses, val_losses = res
-#         else:
-#             train_losses, val_losses = res
-
-#         # 5) Plot loss curves
-#         os.makedirs("img", exist_ok=True)
-#         fn = f"img/{method_name}_run{run_idx}.png"
-#         plt.figure(figsize=(8,6))
-#         plt.plot(train_losses, label="Train BCE Loss")
-#         plt.plot(val_losses,   label="Val   BCE Loss")
-#         plt.xlabel("Epoch")
-#         plt.ylabel("BCE Loss")
-#         plt.title(f"{method_name} run {run_idx}")
-#         plt.legend()
-#         plt.savefig(fn)
-#         plt.close()
-
-#         # 6) Evaluate
-#         metrics = model.evaluate(x_test, y_test)
-#         print(f"Run {run_idx} test metrics:", metrics)
-#         metrics_list.append(metrics)
-
-#     return metrics_list
-
 def run_experiments(model_class, method_name, num_runs, best_params,
                     train_x_pool, train_y_pool, test_x_pool, test_y_pool,
                     optimizer_fixed="adam", epochs_fixed=300,
@@ -751,7 +1175,6 @@ def run_experiments(model_class, method_name, num_runs, best_params,
     # lambda_aux_val = best_params['lambda_aux'] if 'lambda_aux' in best_params else 0.3
     for run_idx in range(num_runs):
         sampled1 = random.sample(class1_indices, 250)
-        # print(sampled1)
         sampled0 = random.sample(class0_indices, 250)
         train_idx = sampled1 + sampled0
         x_train_run = train_x_pool[train_idx]
@@ -774,7 +1197,6 @@ def run_experiments(model_class, method_name, num_runs, best_params,
         test_indices = random.sample(range(test_pool_size), 125)
         x_test_run = test_x_pool[test_indices]
         y_test_run = test_y_pool[test_indices]
-        print(model_class.__name__)
         if model_class.__name__ == "MultiTaskLogisticRegression":
             model = model_class(
                 input_dim=x_train_run.shape[1],
@@ -868,7 +1290,6 @@ def run_experiments(model_class, method_name, num_runs, best_params,
         # Evaluate model on test set
         metrics = model.evaluate(x_test_run, y_test_run)
         metrics_list.append(metrics)
-        print(metrics)
     return metrics_list
 
 # def run_experiments(model_class, method_name, num_runs, best_params,
@@ -952,16 +1373,21 @@ def run_experiments_direct(
     train_df['Diabetes_binary'] = train_y.numpy()
     class1_indices = train_df[train_df['Diabetes_binary'] == 1].index.tolist()
     class0_indices = train_df[train_df['Diabetes_binary'] == 0].index.tolist()
-    for run in range(1, num_runs+1):
+    test_pool_size = len(test_x)
+    for run_idx in range(num_runs):
         # Balanced sampling
-        sampled1 = random.sample(class1_indices, min(250, len(class1_indices)))
-        sampled0 = random.sample(class0_indices, min(250, len(class0_indices)))
+        sampled1 = random.sample(class1_indices, 250)
+        sampled0 = random.sample(class0_indices, 250)
         train_idx = sampled1 + sampled0
         x_sel, y_sel, z_sel = train_x[train_idx], train_y[train_idx], train_z[train_idx]
         # Split into train/val
         perm = np.random.permutation(len(train_idx)); split=int(0.8*len(train_idx))
         tr_i, va_i = perm[:split], perm[split:]
         # print(tr_i)
+        test_indices = random.sample(range(test_pool_size), 125)
+
+        x_test_run = test_x[test_indices]
+        y_test_run = test_y[test_indices]
 
         model = model_class(input_dim=train_x.shape[1], **best_params)
         train_losses, val_losses = model.train_model(
@@ -970,14 +1396,15 @@ def run_experiments_direct(
             early_stopping=early_stopping,
             record_loss=True
         )
-        plot_loss_curve(train_losses, val_losses, f"img/{model_class}_run{run}.png")
+        plot_loss_curve(train_losses, val_losses, f"img/{model_class}_run{run_idx}.png")
 
         # Evaluate on test set
-        metrics = model.evaluate(test_x, test_y)
+        metrics = model.evaluate(x_test_run, y_test_run)
         metrics_list.append(metrics)
-        print(f"Run {run}: {metrics}")
+        print(f"Run {run_idx}: {metrics}")
 
     return metrics_list
+
 
 def run_experiments_pairwise(model_cls, params, train_set, test_set, runs=10, sample_size_per_class=250):
     Xi, Xj, S, yi, yj = train_set
@@ -1002,7 +1429,6 @@ def run_experiments_pairwise(model_cls, params, train_set, test_set, runs=10, sa
         )
         tr_l,va_l=losses
         plot_loss_curve(tr_l,va_l,f"img/{model_cls.__name__}_run{run}.png")
-        print(params)
         metrics = model.evaluate(
             Xi[va], Xj[va], S[va], yi[va], yj[va],
             margin=params["margin"],

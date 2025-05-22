@@ -10,11 +10,7 @@ from utils import (
 )
 import torch
 from data.direct_data import DirectDataPreprocessor
-from model.direct_model.direct_pattern_no_decomp import DirectPatternNoDecomp
-from model.direct_model.decoupled_residual_no_decomp import DirectDecoupledResidualNoDecomp
-from model.direct_model.decoupled_residual import DirectDecoupledResidualModel
-from model.direct_model.direct_pattern_residual import DirectPatternResidual
-
+from model.direct_model.direct_models import DirectPatternNoDecomp, DirectDecoupledResidualNoDecomp, DirectDecoupledResidualModel, DirectPatternResidual
 
 def main():
     # Ensure reproducibility
@@ -39,44 +35,66 @@ def main():
     # Define experiments for each direct model
     experiments = [
         {
-            "name": "PatternNoDecomp",
+            "name": "Simul_NoDecomp",
             "model": DirectPatternNoDecomp,
+            # "param_grid": {
+            #     "hidden_dim": [32, 64, 128, 256],
+            #     "num_layers": [1, 2, 3, 4],
+            #     "residual_type": ["concat", "sum"],
+            #     "lr": [0.001, 0.01]
+            # }
             "param_grid": {
-                "hidden_dim": [32, 64],
-                "num_layers": [2, 3],
-                "residual_type": ["concat", "sum"],
-                "lr": [0.001, 0.01],
-                "num_decoder_layers": [1]
-            }
-        },
-        {
-            "name": "DecoupledResidualNoDecomp",
-            "model": DirectDecoupledResidualNoDecomp,
-            "param_grid": {
-                "hidden_dim": [32, 64],
-                "num_layers": [2, 3],
+                "hidden_dim": [32, 64, 128, 256],
+                "num_layers": [1, 2, 3, 4],
                 "residual_type": ["concat", "sum"],
                 "lr": [0.001, 0.01]
             }
-        },
+        }
+        ,
         {
-            "name": "DecoupledResidual",
-            "model": DirectDecoupledResidualModel,
-            "param_grid": {
-                "hidden_dim": [32, 64],
-                "num_layers": [2, 3],
-                "residual_type": ["concat", "sum"],
-                "lr": [0.001, 0.01]
-            }
-        },
-        {
-            "name": "PatternResidual",
+            "name": "Simul_with_Decomp",
             "model": DirectPatternResidual,
+            # "param_grid": {
+            #     "hidden_dim": [32, 64, 128, 256],
+            #     "num_layers": [1, 2, 3, 4]
+            #     "lr": [0.001, 0.01]
+            # }
             "param_grid": {
-                "hidden_dim": [32, 64],
-                "num_layers": [2, 3],
-                "residual_type": ["concat", "sum"],
+                "hidden_dim": [32, 64, 128, 256],
+                "num_layers": [1, 2],
                 "lr": [0.001, 0.01]
+            }
+        }
+        ,
+        {
+            "name": "Decoupled_NoDecomp",
+            "model": DirectDecoupledResidualNoDecomp,
+            # "param_grid": {
+            #     "hidden_dim": [32, 64, 128, 256],
+            #     "num_layers": [1, 2, 3, 4],
+            #     "residual_type": ["concat", "sum"],
+            #     "lr": [0.001, 0.01]
+            # }
+            "param_grid": {
+                "hidden_dim": [32, 64, 128],
+                "num_layers": [1, 2],
+                "lr": [0.001]
+            }
+        }
+        ,
+        {
+            "name": "Decoupled_with_Decomp",
+            "model": DirectDecoupledResidualModel,
+            # "param_grid": {
+            #     "hidden_dim": [32, 64, 128, 256],
+            #     "num_layers": [1, 2, 3, 4],
+            #     "residual_type": ["concat", "sum"],
+            #     "lr": [0.001, 0.01]
+            # }
+            "param_grid": {
+                "hidden_dim": [64],
+                "num_layers": [1],
+                "lr": [0.01]
             }
         }
     ]
@@ -84,7 +102,6 @@ def main():
     # Run experiments for each configuration
     for cfg in experiments:
         if torch.cuda.is_available():
-            print("True")
             torch.cuda.empty_cache()
         name = cfg["name"]
         ModelClass = cfg["model"]

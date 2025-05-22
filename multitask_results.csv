@@ -175,3 +175,53 @@ Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
 PretrainFT,0.82 ± 0.04,,,0.96 ± 0.02,0.71 ± 0.05,0.82 ± 0.04,,0.32 ± 0.06,0.81 ± 0.06,0.45 ± 0.06,0.58 ± 0.08,"{'lr_pre': 0.001, 'lr_fine': 0.005, 'num_layers': 3, 'hidden_dim': 128, 'lambda_aux': 0.3, 'pre_epochs': 300, 'fine_epochs': 300}"
 Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
 PretrainFT,0.82 ± 0.04,,,0.96 ± 0.02,0.71 ± 0.05,0.82 ± 0.04,,0.32 ± 0.06,0.81 ± 0.06,0.45 ± 0.06,0.58 ± 0.08,"{'lr_pre': 0.001, 'lr_fine': 0.005, 'num_layers': 3, 'hidden_dim': 128, 'lambda_aux': 0.3, 'pre_epochs': 300, 'fine_epochs': 300}"
+Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
+Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
+Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
+Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
+Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
+PretrainFT,0.77 ± 0.08,,,0.94 ± 0.04,0.70 ± 0.08,0.80 ± 0.04,,0.29 ± 0.07,0.71 ± 0.16,0.40 ± 0.07,0.76 ± 0.27,"{'lr_pre': 0.001, 'lr_fine': 0.005, 'num_layers': 3, 'hidden_dim': 128, 'lambda_aux': 0.3, 'pre_epochs': 300, 'fine_epochs': 300}"
+Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
+MT-MLP,0.80 ± 0.06,,,0.95 ± 0.03,0.69 ± 0.05,0.79 ± 0.04,,0.29 ± 0.07,0.76 ± 0.14,0.41 ± 0.09,0.61 ± 0.08,"{'lr': 0.001, 'hidden_dim': 256, 'num_layers': 1, 'lambda_aux': 0.01}"
+Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
+MT-MLP,0.85 ± 0.04,,,0.96 ± 0.02,0.72 ± 0.06,0.82 ± 0.04,,0.33 ± 0.07,0.81 ± 0.09,0.46 ± 0.09,0.57 ± 0.09,"{'lr': 0.01, 'hidden_dim': 256, 'num_layers': 1, 'lambda_aux': 0.01}"
+Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
+MT-MLP,0.85 ± 0.04,,,0.96 ± 0.02,0.72 ± 0.06,0.82 ± 0.04,,0.33 ± 0.07,0.81 ± 0.09,0.46 ± 0.09,0.57 ± 0.09,"{'lr': 0.01, 'hidden_dim': 256, 'num_layers': 1, 'lambda_aux': 0.01}"
+Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
+MT-MLP,0.84 ± 0.05,,,0.97 ± 0.02,0.73 ± 0.05,0.83 ± 0.04,,0.34 ± 0.07,0.85 ± 0.08,0.48 ± 0.08,0.56 ± 0.09,"{'lr': 0.001, 'hidden_dim': 128, 'num_layers': 1, 'lambda_aux': 0.01}"
+Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
+Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
+PretrainFT,0.78 ± 0.11,,,0.87 ± 0.29,0.61 ± 0.21,0.71 ± 0.24,,0.29 ± 0.07,0.87 ± 0.08,0.42 ± 0.09,9.37 ± 25.95,"{'lr_pre': 0.01, 'lr_fine': 0.03, 'num_layers': 1, 'hidden_dim': 128, 'lambda_aux': 0.3, 'pre_epochs': 300, 'fine_epochs': 300}"
+PretrainFT,0.82 ± 0.04,,,0.97 ± 0.01,0.69 ± 0.06,0.80 ± 0.04,,0.31 ± 0.05,0.85 ± 0.07,0.45 ± 0.05,0.59 ± 0.08,"{'lr_pre': 0.01, 'lr_fine': 0.001, 'num_layers': 2, 'hidden_dim': 128, 'lambda_aux': 0.3, 'pre_epochs': 300, 'fine_epochs': 300}"
+Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
+Decoupled,0.80 ± 0.05,,,0.96 ± 0.02,0.65 ± 0.07,0.77 ± 0.05,,0.28 ± 0.06,0.81 ± 0.11,0.41 ± 0.08,0.61 ± 0.07,"{'lr': 0.01, 'hidden_dim': 128, 'num_layers': 2, 'lambda_aux': 0.1}"
+Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
+Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
+Decoupled,0.80 ± 0.05,,,0.96 ± 0.02,0.65 ± 0.07,0.77 ± 0.05,,0.28 ± 0.06,0.81 ± 0.11,0.41 ± 0.08,0.61 ± 0.07,"{'lr': 0.01, 'hidden_dim': 128, 'num_layers': 2, 'lambda_aux': 0.1}"
+Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
+Decoupled,0.80 ± 0.05,,,0.96 ± 0.02,0.65 ± 0.07,0.77 ± 0.05,,0.28 ± 0.06,0.81 ± 0.11,0.41 ± 0.08,0.61 ± 0.07,"{'lr': 0.01, 'hidden_dim': 128, 'num_layers': 2, 'lambda_aux': 0.1}"
+Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
+Decoupled,0.80 ± 0.06,,,0.95 ± 0.03,0.67 ± 0.05,0.78 ± 0.04,,0.29 ± 0.04,0.81 ± 0.10,0.42 ± 0.05,0.61 ± 0.05,"{'lr': 0.01, 'hidden_dim': 128, 'num_layers': 1, 'lambda_aux': 0.1}"
+Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
+MT-MLP,0.79 ± 0.07,,,0.95 ± 0.02,0.70 ± 0.05,0.80 ± 0.03,,0.30 ± 0.07,0.77 ± 0.11,0.42 ± 0.08,0.61 ± 0.08,"{'lr': 0.001, 'hidden_dim': 128, 'num_layers': 1, 'lambda_aux': 0.01}"
+Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
+MT-MLP,0.79 ± 0.07,,,0.95 ± 0.02,0.70 ± 0.05,0.80 ± 0.03,,0.30 ± 0.07,0.77 ± 0.11,0.42 ± 0.08,0.61 ± 0.08,"{'lr': 0.001, 'hidden_dim': 128, 'num_layers': 1, 'lambda_aux': 0.01}"
+Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
+MT-MLP,0.80 ± 0.06,,,0.95 ± 0.03,0.69 ± 0.05,0.80 ± 0.04,,0.30 ± 0.06,0.79 ± 0.10,0.43 ± 0.06,0.61 ± 0.07,"{'lr': 0.001, 'hidden_dim': 256, 'num_layers': 1, 'lambda_aux': 0.01}"
+Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
+Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
+MT-MLP,0.80 ± 0.06,,,0.95 ± 0.03,0.69 ± 0.05,0.80 ± 0.04,,0.30 ± 0.06,0.79 ± 0.10,0.43 ± 0.06,0.61 ± 0.07,"{'lr': 0.001, 'hidden_dim': 256, 'num_layers': 1, 'lambda_aux': 0.01}"
+Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
+MT-MLP,0.80 ± 0.06,,,0.95 ± 0.03,0.69 ± 0.05,0.80 ± 0.04,,0.30 ± 0.06,0.79 ± 0.10,0.43 ± 0.06,0.61 ± 0.07,"{'lr': 0.001, 'hidden_dim': 256, 'num_layers': 1, 'lambda_aux': 0.01}"
+Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
+MT-MLP,0.84 ± 0.05,,,0.96 ± 0.02,0.71 ± 0.06,0.81 ± 0.04,,0.32 ± 0.07,0.82 ± 0.09,0.46 ± 0.08,0.56 ± 0.08,"{'lr': 0.001, 'hidden_dim': 256, 'num_layers': 1, 'lambda_aux': 0.01}"
+Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
+PretrainFT,0.84 ± 0.05,,,0.96 ± 0.02,0.71 ± 0.06,0.82 ± 0.04,,0.32 ± 0.06,0.81 ± 0.10,0.46 ± 0.08,0.55 ± 0.08,"{'lr_pre': 0.01, 'lr_fine': 0.001, 'num_layers': 1, 'hidden_dim': 128, 'lambda_aux': 0.3, 'pre_epochs': 300, 'fine_epochs': 300}"
+Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
+Decoupled,0.80 ± 0.04,,,0.95 ± 0.02,0.66 ± 0.06,0.78 ± 0.04,,0.28 ± 0.05,0.79 ± 0.12,0.41 ± 0.07,0.61 ± 0.07,"{'lr': 0.01, 'hidden_dim': 128, 'num_layers': 2, 'lambda_aux': 0.1}"
+Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
+Decoupled,0.80 ± 0.04,,,0.95 ± 0.02,0.66 ± 0.06,0.78 ± 0.04,,0.28 ± 0.05,0.79 ± 0.12,0.41 ± 0.07,0.61 ± 0.07,"{'lr': 0.01, 'hidden_dim': 128, 'num_layers': 2, 'lambda_aux': 0.1}"
+Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
+MT-MLP,0.84 ± 0.05,,,0.96 ± 0.02,0.71 ± 0.06,0.81 ± 0.04,,0.32 ± 0.07,0.82 ± 0.09,0.46 ± 0.08,0.56 ± 0.08,"{'lr': 0.001, 'hidden_dim': 256, 'num_layers': 1, 'lambda_aux': 0.01}"
+Method,AUC,Acc0,Prec0,Rec0,F10,Acc1,Prec1,Rec1,F11,BCE_Loss,Params
+PretrainFT,0.84 ± 0.05,,,0.96 ± 0.02,0.71 ± 0.06,0.82 ± 0.04,,0.32 ± 0.06,0.81 ± 0.10,0.46 ± 0.08,0.55 ± 0.08,"{'lr_pre': 0.01, 'lr_fine': 0.001, 'num_layers': 1, 'hidden_dim': 128, 'lambda_aux': 0.3, 'pre_epochs': 300, 'fine_epochs': 300}"

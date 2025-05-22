@@ -124,6 +124,7 @@ class DirectPatternResidual(nn.Module):
         with torch.no_grad():
             _, y_pred = self.forward(x)
             y_pred=y_pred.view(-1)
+            y = y.view(-1)
             y_hat = (y_pred >= 0.5).float()
             acc = (y_hat == y).float().mean().item()
             try:

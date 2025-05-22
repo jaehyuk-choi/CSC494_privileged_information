@@ -145,6 +145,7 @@ class DirectDecoupledResidualModel(nn.Module):
         with torch.no_grad():
             _, y_hat = self.forward(x)
             y_hat=y_hat.view(-1)
+            y = y.view(-1)
             preds = (y_hat >= 0.5).float()
             try:
                 auc = roc_auc_score(y.cpu(), y_hat.cpu())

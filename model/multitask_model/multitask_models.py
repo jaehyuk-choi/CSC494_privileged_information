@@ -48,7 +48,7 @@ class MultiTaskLogisticRegression(nn.Module):
 
     def train_model(self, x, main_y, aux1_y=None, aux2_y=None, aux3_y=None,
                     x_val=None, main_y_val=None, aux1_val=None, aux2_val=None, aux3_val=None,
-                    early_stopping_patience=10, record_loss=False):
+                    early_stopping_patience=30, record_loss=False):
         train_losses, val_losses = [], []
         best_val, patience = float('inf'), 0
 
@@ -273,148 +273,6 @@ class MultiTaskNN(nn.Module):
             bce_loss = self.main_loss_fn(main_out, y.view(-1))
         return {"auc": auc, "p0": p0, "r0": r0, "f0": f0, "p1": p1, "r1": r1, "f1": f1, "bce_loss": bce_loss.item()}
 
-# class MultiTaskNN(nn.Module):
-#     """
-#     Multi-task MLP with configurable hidden_dim and num_layers.
-#     Records only main BCE loss for plotting.
-#     """
-#     def __init__(self, input_dim, hidden_dim=16, num_layers=1,
-#                  lr=0.01, lambda_aux=0.3, epochs=300):
-#         super().__init__()
-#         self.hidden_dim = hidden_dim
-#         self.num_layers = num_layers
-#         self.lambda_aux = lambda_aux
-#         self.epochs = epochs
-
-#         # build feature extractor
-#         layers = []
-#         in_dim = input_dim
-#         self.feature_layers = nn.ModuleList()
-#         for i in range(num_layers):
-#             if i == 0:
-#                 self.feature_layers.append(nn.Sequential(
-#                     nn.Linear(input_dim, hidden_dim),
-#                     nn.ReLU()
-#                 ))
-#             else:
-#                 self.feature_layers.append(nn.Sequential(
-#                     nn.Linear(hidden_dim, hidden_dim),
-#                     nn.ReLU()
-#                 ))
-            
-#         # # build feature extractor
-#         # layers = []
-#         # in_dim = input_dim
-#         # for _ in range(num_layers):
-#         #     layers.append(nn.Linear(in_dim, hidden_dim))
-#         #     layers.append(nn.ReLU())
-#         #     in_dim = hidden_dim
-#         # self.feature = nn.Sequential(*layers)
-
-#         self.shared = nn.Sequential(nn.Linear(hidden_dim, hidden_dim), nn.ReLU())
-
-#         # heads
-#         self.main_head = nn.Sequential(nn.Linear(hidden_dim,1), nn.Sigmoid())
-#         self.aux1 = nn.Linear(hidden_dim,1)
-#         self.aux2 = nn.Linear(hidden_dim,1)
-#         self.aux3 = nn.Sequential(nn.Linear(hidden_dim,1), nn.Sigmoid())
-
-#         # learnable attention on layers (α)
-#         self.alpha1 = nn.Parameter(torch.ones(num_layers))
-#         self.alpha2 = nn.Parameter(torch.ones(num_layers))
-#         self.alpha3 = nn.Parameter(torch.ones(num_layers))
-
-#         self.optimizer = optim.Adam(self.parameters(), lr=lr)
-#         self.main_loss_fn = nn.BCELoss()
-#         self.aux_mse = nn.MSELoss()
-#         self.aux_bce = nn.BCELoss()
-
-#     def forward(self, x):
-#         # collect intermediate outputs
-#         outs = []
-#         h = x
-#         for layer in self.feature_layers:
-#             h = layer(h)
-#             outs.append(h)
-
-#         # main path
-#         h_main = self.shared(outs[-1])
-#         main_out = self.main_head(h_main).view(-1)
-
-#         # weighted aux path
-#         def weighted(alpha, seq):
-#             w = torch.softmax(alpha, dim=0)
-#             return sum(w[i]*seq[i] for i in range(len(seq)))
-
-#         h1 = self.shared(weighted(self.alpha1, outs))
-#         h2 = self.shared(weighted(self.alpha2, outs))
-#         h3 = self.shared(weighted(self.alpha3, outs))
-
-#         a1 = self.aux1(h1).view(-1)
-#         a2 = self.aux2(h2).view(-1)
-#         a3 = self.aux3(h3).view(-1)
-#         return main_out, a1, a2, a3
-
-#     def train_model(self, x, y_main, aux1_y=None, aux2_y=None, aux3_y=None,
-#                     x_val=None, main_y_val=None,
-#                     early_stopping_patience=10, record_loss=False):
-#         train_losses, val_losses = [], []
-#         best_val, patience = float('inf'), 0
-
-#         for epoch in range(self.epochs):
-#             self.train()
-#             self.optimizer.zero_grad()
-#             out_main, out1, out2, out3 = self.forward(x)
-#             loss_main = self.main_loss_fn(out_main, y_main.view(-1))
-#             break
-#             if aux1_y is not None:
-#                 l1 = self.aux_mse(out1, aux1_y.view(-1))
-#                 l2 = self.aux_mse(out2, aux2_y.view(-1))
-#                 l3 = self.aux_bce(out3, aux3_y.view(-1))
-#                 loss = loss_main + self.lambda_aux*(l1+l2+l3)
-#             else:
-#                 loss = loss_main
-
-#             loss.backward()
-#             self.optimizer.step()
-
-#             if record_loss:
-#                 train_losses.append(loss_main.item())
-#             # validation
-#             if x_val is not None:
-#                 self.eval()
-#                 with torch.no_grad():
-#                     v_main, _, _, _ = self.forward(x_val)
-#                     v_loss = self.main_loss_fn(v_main, main_y_val.view(-1))
-#                 if record_loss:
-#                     val_losses.append(v_loss.item())
-#                 if v_loss.item() < best_val:
-#                     best_val, patience = v_loss.item(), 0
-#                 else:
-#                     patience += 1
-#                     if patience >= early_stopping_patience:
-#                         break
-
-#         if record_loss:
-#             return train_losses, val_losses
-
-#     def evaluate(self, x, y):
-#         self.eval()
-#         with torch.no_grad():
-#             out_main, _, _, _ = self.forward(x)
-#             preds = (out_main >= 0.5).float().cpu().numpy()
-#             y_np = y.cpu().numpy()
-#             p, r, f, _ = precision_recall_fscore_support(y_np, preds, labels=[0,1], zero_division=0)
-#             auc = roc_auc_score(y_np, out_main.cpu().numpy())
-#             loss = self.main_loss_fn(out_main, y.view(-1)).item()
-#         return {
-#             "auc": auc,
-#             "p0": p[0], "r0": r[0], "f0": f[0],
-#             "p1": p[1], "r1": r[1], "f1": f[1],
-#             "bce_loss": loss
-#         }
-
-
 # -----------------------------------------------------------------------------
 # 3. Pre-train & Fine-tune (extended with validation & early-stopping)
 # -----------------------------------------------------------------------------
@@ -490,7 +348,7 @@ class MultiTaskNN_PretrainFinetuneExtended(nn.Module):
     def train_pre_fine(self,
                       x_pre, y_main_pre, aux1_pre, aux2_pre, aux3_pre,
                       x_fine, y_fine,
-                      record_loss=False, early_stopping_patience=10,
+                      record_loss=False, early_stopping_patience=30,
                       x_fine_val=None, y_fine_val=None):
         pre_losses, fine_losses, val_losses = [], [], []
 
@@ -562,7 +420,7 @@ class MultiTaskNN_PretrainFinetuneExtended(nn.Module):
         aux1=None, aux2=None, aux3=None,
         x_val=None, main_y_val=None,
         aux1_val=None, aux2_val=None, aux3_val=None,
-        early_stopping_patience=10, record_loss=False
+        early_stopping_patience=30, record_loss=False
     ):
         # delegate to your two‑phase trainer
         return self.train_pre_fine(
@@ -666,7 +524,7 @@ class MultiTaskNN_Decoupled(nn.Module):
         self,
         x, y_main, aux1_y, aux2_y, aux3_y,
         x_val=None, main_y_val=None, aux1_val=None, aux2_val=None, aux3_val=None,
-        early_stopping_patience=10,
+        early_stopping_patience=30,
         record_loss=False
     ):
         pre_losses, main_losses, val_losses = [], [], []
@@ -750,158 +608,3 @@ class MultiTaskNN_Decoupled(nn.Module):
             "p1": p[1], "r1": r[1], "f1": f[1],
             "bce_loss": loss
         }
-
-# class MultiTaskNN_Decoupled(nn.Module):
-#     """
-#     Decoupled multi-task network:
-#     - Phase1: optimize auxiliary losses φ & β.
-#     - Phase2: freeze φ & β, then optimize main head ψ.
-#     """
-#     def __init__(self, input_dim, hidden_dim=16, num_layers=1,
-#                  lr=0.01, lambda_aux=0.3,
-#                  pre_epochs=100, main_epochs=100):
-#         super().__init__()
-#         self.lambda_aux = lambda_aux
-#         self.pre_epochs = pre_epochs
-#         self.main_epochs = main_epochs
-#         self.num_layers = num_layers
-#         self.hidden_dim = hidden_dim
-
-#         self.feature = nn.ModuleList()
-#         for i in range(num_layers):
-#             if i == 0:
-#                 self.feature.append(nn.Sequential(
-#                     nn.Linear(input_dim, hidden_dim),
-#                     nn.ReLU()
-#                 ))
-#             else:
-#                 self.feature.append(nn.Sequential(
-#                     nn.Linear(hidden_dim, hidden_dim),
-#                     nn.ReLU()
-#                 ))
-
-#         self.shared = nn.Sequential(nn.Linear(hidden_dim, hidden_dim), nn.ReLU())
-#         self.main = nn.Sequential(nn.Linear(hidden_dim,1), nn.Sigmoid())
-#         self.aux1 = nn.Linear(hidden_dim,1)
-#         self.aux2 = nn.Linear(hidden_dim,1)
-#         self.aux3 = nn.Sequential(nn.Linear(hidden_dim,1), nn.Sigmoid())
-
-#         self.alpha1 = nn.Parameter(torch.ones(num_layers))
-#         self.alpha2 = nn.Parameter(torch.ones(num_layers))
-#         self.alpha3 = nn.Parameter(torch.ones(num_layers))
-
-#         self.main_loss_fn = nn.BCELoss()
-#         self.aux_mse = nn.MSELoss()
-#         self.aux_bce = nn.BCELoss()
-
-#         self.lr = lr
-
-#     def forward(self, x):
-#         outs = []
-#         h = x
-#         for layer in self.feature:
-#             h = layer(h)
-#             outs.append(h)
-#         shared_main = self.shared(outs[-1])
-#         main_out = self.main(shared_main).view(-1)
-
-#         def weighted(alpha, seq):
-#             weights = torch.softmax(alpha, dim=0)
-#             combined = sum(w * out for w, out in zip(weights, seq))
-#             return combined
-
-#         s1 = self.shared(weighted(self.alpha1, outs))
-#         s2 = self.shared(weighted(self.alpha2, outs))
-#         s3 = self.shared(weighted(self.alpha3, outs))
-#         a1 = self.aux1(s1).view(-1)
-#         a2 = self.aux2(s2).view(-1)
-#         a3 = self.aux3(s3).view(-1)
-#         return main_out, a1, a2, a3
-
-#     def train_model(
-#         self,
-#         x, y_main, aux1_y, aux2_y, aux3_y,
-#         x_val=None, main_y_val=None,
-#         early_stopping_patience=10,
-#         record_loss=False
-#     ):
-#         pre_losses, main_losses, val_losses = [], [], []
-
-#         # Phase1: auxiliary optimization (기존 그대로)
-#         opt_pre = optim.Adam(
-#             list(self.feature.parameters()) +
-#             list(self.aux1.parameters()) +
-#             list(self.aux2.parameters()) +
-#             list(self.aux3.parameters()) +
-#             [self.alpha1, self.alpha2, self.alpha3],
-#             lr=self.lr
-#         )
-#         for _ in range(self.pre_epochs):
-#             self.train()
-#             opt_pre.zero_grad()
-#             _, o1, o2, o3 = self.forward(x)
-#             loss_side = self.lambda_aux*( 
-#                 self.aux_mse(o1, aux1_y.view(-1)) +
-#                 self.aux_mse(o2, aux2_y.view(-1)) +
-#                 self.aux_bce(o3, aux3_y.view(-1))
-#             )
-#             loss_side.backward()
-#             opt_pre.step()
-#             if record_loss:
-#                 pre_losses.append(loss_side.item())
-
-#         # freeze φ & β
-#         for p in self.feature.parameters(): p.requires_grad=False
-#         for p in self.shared.parameters():  p.requires_grad=False
-#         for p in self.aux1.parameters():    p.requires_grad=False
-#         for p in self.aux2.parameters():    p.requires_grad=False
-#         for p in self.aux3.parameters():    p.requires_grad=False
-#         self.alpha1.requires_grad=self.alpha2.requires_grad=self.alpha3.requires_grad=False
-
-#         # Phase2: fine‑tune on main task with validation
-#         opt_main = optim.Adam(filter(lambda p: p.requires_grad, self.parameters()), lr=self.lr)
-#         best_val, patience = float('inf'), 0
-
-#         for _ in range(self.main_epochs):
-#             self.train()
-#             opt_main.zero_grad()
-#             out_main, _, _, _ = self.forward(x)
-#             loss_main = self.main_loss_fn(out_main, y_main.view(-1))
-#             loss_main.backward()
-#             opt_main.step()
-#             if record_loss:
-#                 main_losses.append(loss_main.item())
-
-#             if x_val is not None:
-#                 self.eval()
-#                 with torch.no_grad():
-#                     v_main, _, _, _ = self.forward(x_val)
-#                     v_loss = self.main_loss_fn(v_main, main_y_val.view(-1))
-#                 if record_loss:
-#                     val_losses.append(v_loss.item())
-#                 if v_loss.item() < best_val:
-#                     best_val, patience = v_loss.item(), 0
-#                 else:
-#                     patience += 1
-#                     if patience >= early_stopping_patience:
-#                         break
-#             self.train()
-
-#         if record_loss:
-#             return pre_losses, main_losses, val_losses
-
-#     def evaluate(self, x, y):
-#         self.eval()
-#         with torch.no_grad():
-#             out_main, _, _, _ = self.forward(x)
-#             preds = (out_main >= 0.5).float().cpu().numpy()
-#             y_np = y.cpu().numpy()
-#             p, r, f, _ = precision_recall_fscore_support(y_np, preds, labels=[0,1], zero_division=0)
-#             auc = roc_auc_score(y_np, out_main.cpu().numpy())
-#             loss = self.main_loss_fn(out_main, y.view(-1)).item()
-#         return {
-#             "auc": auc,
-#             "p0": p[0], "r0": r[0], "f0": f[0],
-#             "p1": p[1], "r1": r[1], "f1": f[1],
-#             "bce_loss": loss
-#         }

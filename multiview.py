@@ -171,7 +171,7 @@ def main():
     # Define experiments
     experiments = [
         # {
-        #     "name": "TwoLoss",
+        #     "name": "Finetuned and Pretuned MV",
         #     "model": MultiViewNN_TwoLoss,
         #     "param_grid": {
         #         "hidden": [64, 128, 256],
@@ -184,7 +184,7 @@ def main():
         # }
         # ,
         # {
-        #     "name": "Simul",
+        #     "name": "MV-Simul",
         #     "model": MultiViewNN_Simul,
         #     "param_grid": {
         #         "hidden": [32, 64],
@@ -194,7 +194,7 @@ def main():
         #     }
         # },
         # {
-        #     "name": "MT-MLP-Simul",
+        #     "name": "MT-MV-Simul",
         #     "model": SimultaneousMultiViewMultiTaskNN,
         #     "param_grid": {
         #         "hidden": [64],
@@ -205,7 +205,7 @@ def main():
         #     }
         # },
         {
-            "name": "MT-MLP",
+            "name": "MV MLP",
             "model": MultiViewMLP,
             "param_grid": {
                 "hidden": [128, 256],

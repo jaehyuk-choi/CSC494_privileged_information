@@ -57,9 +57,19 @@ def main():
         #     "name": "MT-MLP",
         #     "model": MultiTaskNN,
         #     "param_grid": {
-        #         "lr": [0.001],
+        #         "lr": [0.001, 0.01],
         #         "hidden_dim": [256],
         #         "num_layers": [1],
+        #         "lambda_aux": [0.01]
+        #     }
+        # }
+        # {
+        #     "name": "MT-MLP",
+        #     "model": MultiTaskNN,
+        #     "param_grid": {
+        #         "lr": [0.001, 0.01],
+        #         "hidden_dim": [64,128,256],
+        #         "num_layers": [1,2,3,4],
         #         "lambda_aux": [0.01]
         #     }
         # }
@@ -68,9 +78,9 @@ def main():
             "name": "PretrainFT",
             "model": MultiTaskNN_PretrainFinetuneExtended,
             "param_grid": {
-                "lr_pre": [0.001],
-                "lr_fine": [0.005],
-                "num_layers": [3],
+                "lr_pre": [0.01],
+                "lr_fine": [0.001],
+                "num_layers": [1,2,3,4],
                 "hidden_dim":[128],
                 "lambda_aux": [0.3],
                 "pre_epochs": [300],
@@ -82,8 +92,8 @@ def main():
         #     "model": MultiTaskNN_Decoupled,
         #     "param_grid": {
         #         "lr": [0.01],
-        #         "hidden_dim":[64],
-        #         "num_layers":[1],
+        #         "hidden_dim":[64, 128, 256],
+        #         "num_layers":[1,2],
         #         "lambda_aux": [0.1]
         #     }
         # }
