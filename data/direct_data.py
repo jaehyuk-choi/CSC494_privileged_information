@@ -11,7 +11,7 @@ class DirectDataPreprocessor:
     Preprocessor for all Direct-pattern models.
     Uses LLM-augmented side information during training (but not in test set).
     """
-    def __init__(self, dataset_id=891, side_info_path='prompting/augmented_data_70B.csv'):
+    def __init__(self, dataset_id=891, side_info_path='prompting/augmented_data.csv'):
         # Fetch the UCI dataset by ID using the ucimlrepo library
         self.original_data = fetch_ucirepo(id=dataset_id)
         self.X_original = self.original_data.data.features
@@ -39,9 +39,9 @@ class DirectDataPreprocessor:
         augmented_df = augmented_df[self.training_cols + [self.target, self.side_info]]
         
         # 2) Drop rows with missing values in either features or target
-        # augmented_df = augmented_df.dropna(subset=[self.target, self.side_info])
-        augmented_df[self.target].fillna(0, inplace=True)
-        augmented_df[self.side_info].fillna(augmented_df[self.side_info].median(), inplace=True)  # Median imputation for side info
+        augmented_df = augmented_df.dropna(subset=[self.target, self.side_info])
+        # augmented_df[self.target].fillna(0, inplace=True)
+        # augmented_df[self.side_info].fillna(augmented_df[self.side_info].median(), inplace=True)  # Median imputation for side info
 
         # 3) Create a balanced 'grid' set from the training data for hyperparameter tuning
         pos_idx = augmented_df[augmented_df[self.target] == 1].index.tolist()

@@ -216,13 +216,6 @@ class SimultaneousMultiViewMultiTaskNN(nn.Module):
     def compute_loss(self, x, z, main_y, aux1_y, aux2_y, aux3_y):
         s, s_prime, main_x, main_z, aux1, aux2, aux3 = self.forward(x, z)
         
-        # # 디버깅: 예측 값과 타깃 값의 범위 출력
-        # print("DEBUG: main_x range:", main_x.min().item(), main_x.max().item())
-        # print("DEBUG: main_z range:", main_z.min().item(), main_z.max().item())
-        # print("DEBUG: aux3 (pred) range:", aux3.min().item(), aux3.max().item())
-        # print("DEBUG: main_y (target) range:", main_y.min().item(), main_y.max().item())
-        # print("DEBUG: aux3_y (target) range:", aux3_y.min().item(), aux3_y.max().item())
-        
         # 타깃 값 클램핑 (필요하면)
         main_y = torch.clamp(main_y, 0.0, 1.0)
         aux3_y = torch.clamp(aux3_y, 0.0, 1.0)
@@ -447,18 +440,18 @@ def main():
     NUM_RUNS = 10
 
     print("\n=== Preprocessing Multi-view + Multi-task Dataset ===")
-    preproc = MultiViewDatasetPreprocessor(dataset_id=891, side_info_path='prompting/augmented_data.csv')
+    preproc = MultiViewDatasetPreprocessor(dataset_id=891, side_info_path='prompting/augmented_data_70B.csv')
     (grid_x, grid_y, grid_z, grid_aux1, grid_aux2, grid_aux3,
      train_x, train_y, train_z, train_aux1, train_aux2, train_aux3,
      test_x, test_y) = preproc.preprocess()
 
     # Grid search using the grid (balanced) data
     param_grid = {
-        "lr": [0.001],
-        "hidden_dim": [64, 256],
+        "lr": [0.001, 0.01],
+        "hidden_dim": [64, 128, 256],
         "num_layers": [1,2,3,4],
-        "lambda_aux": [0.01],
-        "lambda_direct": [0.01]
+        "lambda_aux": [0.01, 0.1, 0.3],
+        "lambda_direct": [0.01, 0.1, 0.3]
     }
     print("\n[Grid Search] Starting grid search for best hyperparameters...")
     best_params, best_auc = grid_search_cv(SimultaneousMultiViewMultiTaskNN, param_grid, grid_x, grid_y, grid_z, 

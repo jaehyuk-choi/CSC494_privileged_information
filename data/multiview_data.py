@@ -50,7 +50,21 @@ class MultiViewDatasetPreprocessor:
         augmented_df = pd.read_csv(self.side_info_path)
 
         # 2) Drop rows with missing values in either features or target
-        augmented_df = augmented_df.dropna(subset=self.view2_cont_cols + self.view2_cat_cols + [self.target])
+        cols_to_check = self.view2_cont_cols + self.view2_cat_cols + [self.target]
+        na_counts = augmented_df[cols_to_check].isna().sum()
+        na_ratio = (na_counts / len(augmented_df)) * 100
+        col_dtypes = augmented_df[cols_to_check].dtypes
+        for col in cols_to_check:
+            print(f"{col}: {na_counts[col]} missing ({na_ratio[col]:.2f}%) — dtype: {col_dtypes[col]}")
+
+        cols_to_fill = self.view2_cont_cols + self.view2_cat_cols + [self.target]
+
+        for col in cols_to_fill:
+            if augmented_df[col].isna().any():  # NaN이 있는 경우만 처리
+                median_value = augmented_df[col].median()
+                augmented_df[col].fillna(median_value, inplace=True)
+
+        # augmented_df = augmented_df.dropna(subset=self.view2_cont_cols + self.view2_cat_cols + [self.target])
 
         # 3) Create a balanced 'grid' set from the training data for hyperparameter tuning
         pos_idx = augmented_df[augmented_df[self.target] == 1].index.tolist()

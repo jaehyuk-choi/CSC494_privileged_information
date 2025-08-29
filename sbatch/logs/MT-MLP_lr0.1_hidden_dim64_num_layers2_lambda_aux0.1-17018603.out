@@ -1,0 +1,20 @@
+[MT-MLP] Iteration 1 → Best CV params: {'lr': 0.1, 'hidden_dim': 64, 'num_layers': 2, 'lambda_aux': 0.1}, Avg CV AUC: 0.5019
+[MT-MLP] Iteration 1 → Test metrics: {'auc': 0.5047619047619047, 'p0': 0.0, 'r0': 0.0, 'f0': 0.0, 'p1': 0.16, 'r1': 1.0, 'f1': 0.2758620689655173, 'bce_loss': 0.6948702335357666}
+[MT-MLP] Iteration 2 → Best CV params: {'lr': 0.1, 'hidden_dim': 64, 'num_layers': 2, 'lambda_aux': 0.1}, Avg CV AUC: 0.4112
+[MT-MLP] Iteration 2 → Test metrics: {'auc': 0.5, 'p0': 0.84, 'r0': 1.0, 'f0': 0.9130434782608696, 'p1': 0.0, 'r1': 0.0, 'f1': 0.0, 'bce_loss': 0.6931471824645996}
+[MT-MLP] Iteration 3 → Best CV params: {'lr': 0.1, 'hidden_dim': 64, 'num_layers': 2, 'lambda_aux': 0.1}, Avg CV AUC: 0.5058
+[MT-MLP] Iteration 3 → Test metrics: {'auc': 0.7745726495726495, 'p0': 0.967032967032967, 'r0': 0.7521367521367521, 'f0': 0.846153846153846, 'p1': 0.14705882352941177, 'r1': 0.625, 'f1': 0.2380952380952381, 'bce_loss': 0.5207212567329407}
+[MT-MLP] Iteration 4 → Best CV params: {'lr': 0.1, 'hidden_dim': 64, 'num_layers': 2, 'lambda_aux': 0.1}, Avg CV AUC: 0.4286
+[MT-MLP] Iteration 4 → Test metrics: {'auc': 0.7625272331154684, 'p0': 0.9375, 'r0': 0.6944444444444444, 'f0': 0.7978723404255319, 'p1': 0.26666666666666666, 'r1': 0.7058823529411765, 'f1': 0.3870967741935483, 'bce_loss': 0.6246774792671204}
+[MT-MLP] Iteration 5 → Best CV params: {'lr': 0.1, 'hidden_dim': 64, 'num_layers': 2, 'lambda_aux': 0.1}, Avg CV AUC: 0.4959
+[MT-MLP] Iteration 5 → Test metrics: {'auc': 0.5, 'p0': 0.0, 'r0': 0.0, 'f0': 0.0, 'p1': 0.112, 'r1': 1.0, 'f1': 0.2014388489208633, 'bce_loss': 0.6931472420692444}
+[MT-MLP] Iteration 6 → Best CV params: {'lr': 0.1, 'hidden_dim': 64, 'num_layers': 2, 'lambda_aux': 0.1}, Avg CV AUC: 0.4961
+[MT-MLP] Iteration 6 → Test metrics: {'auc': 0.5048076923076923, 'p0': 1.0, 'r0': 0.009615384615384616, 'f0': 0.01904761904761905, 'p1': 0.1693548387096774, 'r1': 1.0, 'f1': 0.28965517241379307, 'bce_loss': 0.693148136138916}
+[MT-MLP] Iteration 7 → Best CV params: {'lr': 0.1, 'hidden_dim': 64, 'num_layers': 2, 'lambda_aux': 0.1}, Avg CV AUC: 0.4981
+[MT-MLP] Iteration 7 → Test metrics: {'auc': 0.7956802383316783, 'p0': 0.9176470588235294, 'r0': 0.7358490566037735, 'f0': 0.8167539267015705, 'p1': 0.3, 'r1': 0.631578947368421, 'f1': 0.4067796610169491, 'bce_loss': 0.48922863602638245}
+[MT-MLP] Iteration 8 → Best CV params: {'lr': 0.1, 'hidden_dim': 64, 'num_layers': 2, 'lambda_aux': 0.1}, Avg CV AUC: 0.6107
+[MT-MLP] Iteration 8 → Test metrics: {'auc': 0.6258600917431193, 'p0': 0.9295774647887324, 'r0': 0.6055045871559633, 'f0': 0.7333333333333334, 'p1': 0.2037037037037037, 'r1': 0.6875, 'f1': 0.3142857142857142, 'bce_loss': 0.7105960845947266}
+[MT-MLP] Iteration 9 → Best CV params: {'lr': 0.1, 'hidden_dim': 64, 'num_layers': 2, 'lambda_aux': 0.1}, Avg CV AUC: 0.4999
+[MT-MLP] Iteration 9 → Test metrics: {'auc': 0.5, 'p0': 0.0, 'r0': 0.0, 'f0': 0.0, 'p1': 0.176, 'r1': 1.0, 'f1': 0.29931972789115646, 'bce_loss': 0.6931477189064026}
+[MT-MLP] Iteration 10 → Best CV params: {'lr': 0.1, 'hidden_dim': 64, 'num_layers': 2, 'lambda_aux': 0.1}, Avg CV AUC: 0.4962
+[MT-MLP] Iteration 10 → Test metrics: {'auc': 0.5, 'p0': 0.0, 'r0': 0.0, 'f0': 0.0, 'p1': 0.168, 'r1': 1.0, 'f1': 0.28767123287671237, 'bce_loss': 0.69582200050354}

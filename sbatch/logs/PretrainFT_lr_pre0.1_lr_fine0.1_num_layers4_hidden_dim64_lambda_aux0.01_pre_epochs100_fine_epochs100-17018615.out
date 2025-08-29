@@ -1,0 +1,20 @@
+[PretrainFT] Iteration 1 → Best CV params: {'lr_pre': 0.1, 'lr_fine': 0.1, 'num_layers': 4, 'hidden_dim': 64, 'lambda_aux': 0.01, 'pre_epochs': 100, 'fine_epochs': 100}, Avg CV AUC: 0.5001
+[PretrainFT] Iteration 1 → Test metrics: {'auc': 0.5, 'p0': 0.0, 'r0': 0.0, 'f0': 0.0, 'p1': 0.16, 'r1': 1.0, 'f1': 0.2758620689655173, 'bce_loss': 84.0}
+[PretrainFT] Iteration 2 → Best CV params: {'lr_pre': 0.1, 'lr_fine': 0.1, 'num_layers': 4, 'hidden_dim': 64, 'lambda_aux': 0.01, 'pre_epochs': 100, 'fine_epochs': 100}, Avg CV AUC: 0.5000
+[PretrainFT] Iteration 2 → Test metrics: {'auc': 0.5, 'p0': 0.0, 'r0': 0.0, 'f0': 0.0, 'p1': 0.16, 'r1': 1.0, 'f1': 0.2758620689655173, 'bce_loss': 84.0}
+[PretrainFT] Iteration 3 → Best CV params: {'lr_pre': 0.1, 'lr_fine': 0.1, 'num_layers': 4, 'hidden_dim': 64, 'lambda_aux': 0.01, 'pre_epochs': 100, 'fine_epochs': 100}, Avg CV AUC: 0.4879
+[PretrainFT] Iteration 3 → Test metrics: {'auc': 0.5042735042735043, 'p0': 1.0, 'r0': 0.008547008547008548, 'f0': 0.016949152542372885, 'p1': 0.06451612903225806, 'r1': 1.0, 'f1': 0.12121212121212122, 'bce_loss': 0.6911226511001587}
+[PretrainFT] Iteration 4 → Best CV params: {'lr_pre': 0.1, 'lr_fine': 0.1, 'num_layers': 4, 'hidden_dim': 64, 'lambda_aux': 0.01, 'pre_epochs': 100, 'fine_epochs': 100}, Avg CV AUC: 0.4902
+[PretrainFT] Iteration 4 → Test metrics: {'auc': 0.5, 'p0': 0.864, 'r0': 1.0, 'f0': 0.9270386266094421, 'p1': 0.0, 'r1': 0.0, 'f1': 0.0, 'bce_loss': 13.600000381469727}
+[PretrainFT] Iteration 5 → Best CV params: {'lr_pre': 0.1, 'lr_fine': 0.1, 'num_layers': 4, 'hidden_dim': 64, 'lambda_aux': 0.01, 'pre_epochs': 100, 'fine_epochs': 100}, Avg CV AUC: 0.5060
+[PretrainFT] Iteration 5 → Test metrics: {'auc': 0.5, 'p0': 0.0, 'r0': 0.0, 'f0': 0.0, 'p1': 0.112, 'r1': 1.0, 'f1': 0.2014388489208633, 'bce_loss': 88.80000305175781}
+[PretrainFT] Iteration 6 → Best CV params: {'lr_pre': 0.1, 'lr_fine': 0.1, 'num_layers': 4, 'hidden_dim': 64, 'lambda_aux': 0.01, 'pre_epochs': 100, 'fine_epochs': 100}, Avg CV AUC: 0.5021
+[PretrainFT] Iteration 6 → Test metrics: {'auc': 0.5, 'p0': 0.832, 'r0': 1.0, 'f0': 0.9082969432314411, 'p1': 0.0, 'r1': 0.0, 'f1': 0.0, 'bce_loss': 16.799999237060547}
+[PretrainFT] Iteration 7 → Best CV params: {'lr_pre': 0.1, 'lr_fine': 0.1, 'num_layers': 4, 'hidden_dim': 64, 'lambda_aux': 0.01, 'pre_epochs': 100, 'fine_epochs': 100}, Avg CV AUC: 0.5153
+[PretrainFT] Iteration 7 → Test metrics: {'auc': 0.5, 'p0': 0.848, 'r0': 1.0, 'f0': 0.9177489177489178, 'p1': 0.0, 'r1': 0.0, 'f1': 0.0, 'bce_loss': 0.6814115047454834}
+[PretrainFT] Iteration 8 → Best CV params: {'lr_pre': 0.1, 'lr_fine': 0.1, 'num_layers': 4, 'hidden_dim': 64, 'lambda_aux': 0.01, 'pre_epochs': 100, 'fine_epochs': 100}, Avg CV AUC: 0.5000
+[PretrainFT] Iteration 8 → Test metrics: {'auc': 0.4827981651376147, 'p0': 0.8666666666666667, 'r0': 0.5963302752293578, 'f0': 0.7065217391304348, 'p1': 0.12, 'r1': 0.375, 'f1': 0.18181818181818182, 'bce_loss': 35.44164276123047}
+[PretrainFT] Iteration 9 → Best CV params: {'lr_pre': 0.1, 'lr_fine': 0.1, 'num_layers': 4, 'hidden_dim': 64, 'lambda_aux': 0.01, 'pre_epochs': 100, 'fine_epochs': 100}, Avg CV AUC: 0.5000
+[PretrainFT] Iteration 9 → Test metrics: {'auc': 0.5, 'p0': 0.0, 'r0': 0.0, 'f0': 0.0, 'p1': 0.176, 'r1': 1.0, 'f1': 0.29931972789115646, 'bce_loss': 82.4000015258789}
+[PretrainFT] Iteration 10 → Best CV params: {'lr_pre': 0.1, 'lr_fine': 0.1, 'num_layers': 4, 'hidden_dim': 64, 'lambda_aux': 0.01, 'pre_epochs': 100, 'fine_epochs': 100}, Avg CV AUC: 0.5000
+[PretrainFT] Iteration 10 → Test metrics: {'auc': 0.5, 'p0': 0.832, 'r0': 1.0, 'f0': 0.9082969432314411, 'p1': 0.0, 'r1': 0.0, 'f1': 0.0, 'bce_loss': 16.799999237060547}

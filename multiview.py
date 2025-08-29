@@ -165,9 +165,9 @@ def main():
         writer.writerow(["Method", "AUC", "Params"])
 
     # Load and preprocess data
-    dp = MultiViewDatasetPreprocessor(side_info_path='prompting/augmented_data.csv', dataset_id=891)
+    dp = MultiViewDatasetPreprocessor(side_info_path='prompting/augmented_data_70B.csv', dataset_id=891)
     (grid_X, grid_y, grid_Z), (train_X, train_y, train_Z), (test_X, test_y, test_Z) = dp.preprocess()
-
+    print("70B")
     # Define experiments
     experiments = [
         # {
@@ -175,11 +175,35 @@ def main():
         #     "model": MultiViewNN_TwoLoss,
         #     "param_grid": {
         #         "hidden": [64, 128, 256],
-        #         "num_layers_x": [1, 2, 3],
-        #         "num_layers_z": [1, 2, 3],
+        #         "num_layers_x": [1, 2, 3, 4],
+        #         "num_layers_z": [1, 2, 3, 4],
         #         "lr": [0.001, 0.01],
         #         "epochs": [100, 300],
-        #         "lambda_aux": [0.3, 0.5]
+        #         "lambda_aux": [0.1, 0.3, 0.5]
+        #     }
+        # }
+        # {
+        #     "name": "Finetuned and Pretuned MV",
+        #     "model": MultiViewNN_TwoLoss,
+        #     "param_grid": {
+        #         "hidden": [128],
+        #         "num_layers_x": [1],
+        #         "num_layers_z": [2],
+        #         "lr": [0.001],
+        #         "epochs": [100],
+        #         "lambda_aux": [ 0.3]
+        #     }
+        # }
+        # {
+        #     "name": "Finetuned and Pretuned MV",
+        #     "model": MultiViewNN_TwoLoss,
+        #     "param_grid": {
+        #         "hidden": [64],
+        #         "num_layers_x": [1],
+        #         "num_layers_z": [1],
+        #         "lr": [0.001],
+        #         "epochs": [100],
+        #         "lambda_aux": [ 0.5]
         #     }
         # }
         # ,
@@ -187,10 +211,21 @@ def main():
         #     "name": "MV-Simul",
         #     "model": MultiViewNN_Simul,
         #     "param_grid": {
-        #         "hidden": [32, 64],
-        #         "lr": [0.001, 0.01],
-        #         "epochs": [100],
-        #         "lambda_aux": [0.3, 0.5]
+        #         "hidden": [64, 128, 256],
+        #         "lr": [0.001, 0.01, 0.1],
+        #         "epochs": [100, 300],
+        #         "lambda_aux": [0.1, 0.3, 0.5]
+        #     }
+        # }
+        # ,
+        # {
+        #     "name": "MV-Simul",
+        #     "model": MultiViewNN_Simul,
+        #     "param_grid": {
+        #         "hidden": [64],
+        #         "lr": [0.001],
+        #         "epochs": [100, 300],
+        #         "lambda_aux": [0.5]
         #     }
         # },
         # {

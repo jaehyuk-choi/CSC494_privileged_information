@@ -34,22 +34,22 @@ def main():
         {
             "name": "BaselineMLP",
             "model": BaselineMLP,
-            "param_grid": {"lr": [0.001], "hidden_dim": [64], "num_layers": [1]}
+            "param_grid": {"lr": [0.001, 0.01], "hidden_dim": [64, 128, 256], "num_layers": [1, 2, 3, 4]}
         },
         {
             "name": "LogisticRegression",
             "model": BaselineLogisticRegression,
-            "param_grid": {"lr": [0.01]}
+            "param_grid": {"lr": [0.001, 0.01]}
         },
         {
             "name": "XGBoost",
             "model": XGBoostModel,
-            "param_grid": {"learning_rate": [0.1], "max_depth": [5], "n_estimators": [100]}
+            "param_grid": {"learning_rate": [0.001, 0.01], "max_depth": [3,5,7], "n_estimators": [100, 300]}
         },
         {
             "name": "RandomForest",
             "model": RandomForestModel,
-            "param_grid": {"max_depth": [5], "n_estimators": [300]}
+            "param_grid": {"max_depth": [3,5,7], "n_estimators": [100, 300]}
         }
     ]
 

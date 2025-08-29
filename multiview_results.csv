@@ -1,2 +1,1 @@
 Method,AUC,Params
-MV MLP,0.77 ± 0.06,"{'hidden': 128, 'num_layers_x': 1, 'num_layers_z': 3, 'lr': 0.001, 'lambda_view': 0.5, 'epochs': 300}"

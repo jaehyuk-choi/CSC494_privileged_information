@@ -11,6 +11,8 @@ from utils import (
 import torch
 from data.direct_data import DirectDataPreprocessor
 from model.direct_model.direct_models import DirectPatternNoDecomp, DirectDecoupledResidualNoDecomp, DirectDecoupledResidualModel, DirectPatternResidual
+from model.direct_model.combined_multitask import CombinedMultiTaskNN
+
 
 def main():
     # Ensure reproducibility
@@ -34,69 +36,58 @@ def main():
 
     # Define experiments for each direct model
     experiments = [
+        # {
+        #     "name": "Combined_MultiTask",
+        #     "model": CombinedMultiTaskNN,
+        #     "param_grid": {
+        #         # input_dim is inferred from grid_x.shape[1] inside grid_search_direct
+        #         "hidden_dim": [64, 128, 256],
+        #         "num_layers": [1, 2, 3],
+        #         "lr": [0.001, 0.01],
+        #         "lambda_aux": [0.1, 0.3, 0.5],
+        #         "lambda_direct": [0.1, 0.3, 0.5],
+        #         "epochs": [100, 200]
+        #     }
+        # }
         {
             "name": "Simul_NoDecomp",
             "model": DirectPatternNoDecomp,
-            # "param_grid": {
-            #     "hidden_dim": [32, 64, 128, 256],
-            #     "num_layers": [1, 2, 3, 4],
-            #     "residual_type": ["concat", "sum"],
-            #     "lr": [0.001, 0.01]
-            # }
             "param_grid": {
-                "hidden_dim": [32, 64, 128, 256],
+                "hidden_dim": [64, 128, 256],
                 "num_layers": [1, 2, 3, 4],
-                "residual_type": ["concat", "sum"],
                 "lr": [0.001, 0.01]
             }
         }
-        ,
-        {
-            "name": "Simul_with_Decomp",
-            "model": DirectPatternResidual,
-            # "param_grid": {
-            #     "hidden_dim": [32, 64, 128, 256],
-            #     "num_layers": [1, 2, 3, 4]
-            #     "lr": [0.001, 0.01]
-            # }
-            "param_grid": {
-                "hidden_dim": [32, 64, 128, 256],
-                "num_layers": [1, 2],
-                "lr": [0.001, 0.01]
-            }
-        }
-        ,
-        {
-            "name": "Decoupled_NoDecomp",
-            "model": DirectDecoupledResidualNoDecomp,
-            # "param_grid": {
-            #     "hidden_dim": [32, 64, 128, 256],
-            #     "num_layers": [1, 2, 3, 4],
-            #     "residual_type": ["concat", "sum"],
-            #     "lr": [0.001, 0.01]
-            # }
-            "param_grid": {
-                "hidden_dim": [32, 64, 128],
-                "num_layers": [1, 2],
-                "lr": [0.001]
-            }
-        }
-        ,
-        {
-            "name": "Decoupled_with_Decomp",
-            "model": DirectDecoupledResidualModel,
-            # "param_grid": {
-            #     "hidden_dim": [32, 64, 128, 256],
-            #     "num_layers": [1, 2, 3, 4],
-            #     "residual_type": ["concat", "sum"],
-            #     "lr": [0.001, 0.01]
-            # }
-            "param_grid": {
-                "hidden_dim": [64],
-                "num_layers": [1],
-                "lr": [0.01]
-            }
-        }
+        # ,
+        # {
+        #     "name": "Simul_with_Decomp",
+        #     "model": DirectPatternResidual,
+        #     "param_grid": {
+        #         "hidden_dim": [64, 128, 256],
+        #         "num_layers": [1, 2, 3, 4],
+        #         "lr": [0.001, 0.01]
+        #     }
+        # }
+        # ,
+        # {
+        #     "name": "Decoupled_NoDecomp",
+        #     "model": DirectDecoupledResidualNoDecomp,
+        #     "param_grid": {
+        #         "hidden_dim": [64, 128, 256],
+        #         "num_layers": [1, 2, 3, 4],
+        #         "lr": [0.01, 0.001]
+        #     }
+        # }
+        # ,
+        # {
+        #     "name": "Decoupled_with_Decomp",
+        #     "model": DirectDecoupledResidualModel,
+        #     "param_grid": {
+        #         "hidden_dim": [64, 128, 256],
+        #         "num_layers": [1, 2, 3, 4],
+        #         "lr": [0.01, 0.001]
+        #     }
+        # }
     ]
 
     # Run experiments for each configuration

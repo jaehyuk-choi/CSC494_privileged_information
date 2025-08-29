@@ -40,8 +40,9 @@ def main():
     # preprocess data
     dp = MultiTaskDatasetPreprocessor(
         dataset_id=891,
-        side_info_path='prompting/augmented_data.csv'
+        side_info_path='prompting/augmented_data_70B.csv'
     )
+    print("70BBBB")
     (grid_x, grid_y, grid_a1, grid_a2, grid_a3,
      train_x, train_y, ta1, ta2, ta3,
      test_x, test_y) = dp.preprocess()
@@ -57,44 +58,44 @@ def main():
         #     "name": "MT-MLP",
         #     "model": MultiTaskNN,
         #     "param_grid": {
-        #         "lr": [0.001, 0.01],
-        #         "hidden_dim": [256],
+        #         "lr": [0.01],
+        #         "hidden_dim": [128],
         #         "num_layers": [1],
         #         "lambda_aux": [0.01]
         #     }
         # }
-        # {
-        #     "name": "MT-MLP",
-        #     "model": MultiTaskNN,
-        #     "param_grid": {
-        #         "lr": [0.001, 0.01],
-        #         "hidden_dim": [64,128,256],
-        #         "num_layers": [1,2,3,4],
-        #         "lambda_aux": [0.01]
-        #     }
-        # }
-        # ,
         {
-            "name": "PretrainFT",
-            "model": MultiTaskNN_PretrainFinetuneExtended,
+            "name": "MT-MLP",
+            "model": MultiTaskNN,
             "param_grid": {
-                "lr_pre": [0.01],
-                "lr_fine": [0.001],
+                "lr": [0.001, 0.01],
+                "hidden_dim": [64,128,256],
                 "num_layers": [1,2,3,4],
-                "hidden_dim":[128],
-                "lambda_aux": [0.3],
-                "pre_epochs": [300],
-                "fine_epochs": [300]
+                "lambda_aux": [0.01, 0.1, 0.3]
             }
         }
+        # ,
+        # {
+        #     "name": "PretrainFT",
+        #     "model": MultiTaskNN_PretrainFinetuneExtended,
+        #     "param_grid": {
+        #         "lr_pre": [0.01, 0.1],
+        #         "lr_fine": [0.01, 0.1],
+        #         "num_layers": [1,2,3,4],
+        #         "hidden_dim":[64, 128, 256],
+        #         "lambda_aux": [0.01, 0.3, 0.1],
+        #         "pre_epochs": [100, 300],
+        #         "fine_epochs": [100, 300]
+        #     }
+        # }
         # {
         #     "name": "Decoupled",
         #     "model": MultiTaskNN_Decoupled,
         #     "param_grid": {
-        #         "lr": [0.01],
+        #         "lr": [0.01, 0.001],
         #         "hidden_dim":[64, 128, 256],
-        #         "num_layers":[1,2],
-        #         "lambda_aux": [0.1]
+        #         "num_layers":[1,2, 3,4],
+        #         "lambda_aux": [0.1, 0.3, 0.01]
         #     }
         # }
     ]
